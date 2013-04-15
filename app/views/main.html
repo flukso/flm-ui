@@ -1,9 +1,22 @@
-<div class="hero-unit">
-  <h1>'Allo, 'Allo!</h1>
-  <p>You now have</p>
-  <ul>
-      <li ng-repeat="thing in awesomeThings">{{thing}}</li>
-  </ul>
-  <p>installed.</p>
-  <h3>Enjoy coding! - Yeoman</h3>
+<div>
+<alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
 </div>
+<form class="form-horizontal">
+<div class="control-group">
+<label class="control-label">User</label>
+<div class="controls">
+<input type="text" ng-model="user">
+</div>
+</div>
+<div class="control-group">
+<label class="control-label">Password</label>
+<div class="controls">
+<input type="password" ng-model="pass">
+</div>
+</div>
+<div class="control-group">
+<div class="controls">
+<button type="submit" ng-click="rpcLogin()">Sign in</button>
+</div>
+</div>
+</form>

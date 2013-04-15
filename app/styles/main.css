@@ -1,1 +1,17 @@
 /* Will be compiled down to a single stylesheet with your sass files */
+.pagination.sensor {
+    margin: 0;
+}
+
+input.ng-invalid {
+    border-color: #B94A48;
+}
+
+input:focus.ng-invalid {
+    border-color: #E9322D;
+    box-shadow: 0 0 6px #F8B9B7;
+}
+
+.error {
+    color: #B94A48;
+}
