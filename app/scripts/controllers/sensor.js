@@ -2,6 +2,7 @@
 
 angular.module("flmUiApp")
     .controller("SensorCtrl", function($scope, $http, $cookies, $location) {
+        $scope.debug = true;
         $scope.alerts = [];
         $scope.noOfSensors = 5;
         $scope.i = 1;
@@ -113,7 +114,10 @@ angular.module("flmUiApp")
         $http.post(url, request)
             .success(function(response) {
                 if (!response.result) {
-                    $scope.alerts.push({type: "error", msg: response.error});
+                    $scope.alerts.push({
+                        type: "error",
+                        msg: response.error
+                    });
                     return;
                 };
 
