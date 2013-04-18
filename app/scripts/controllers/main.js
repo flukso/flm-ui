@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('flmUiApp')
-  .controller('MainCtrl', function ($scope, $http, $location) {
+  .controller('MainCtrl', function ($rootScope, $scope, $http, $location) {
     $scope.user = "root";
     $scope.pass = "root";
     $scope.alerts = [];
@@ -20,6 +20,7 @@ angular.module('flmUiApp')
 
         $http.post(url, request).success(function(response) {
             if (response.result) {
+                $rootScope.sysauth = response.result;
                 $location.path("/sensor");
             } else {
                 $scope.alerts.push({

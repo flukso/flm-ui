@@ -1,7 +1,7 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("SensorCtrl", function($scope, $http, $cookies, $location) {
+    .controller("SensorCtrl", function($scope, $dialog, $http, $location) {
         $scope.debug = true;
         $scope.alerts = [];
         $scope.noOfSensors = 5;
@@ -79,6 +79,9 @@ angular.module("flmUiApp")
             } else {
                 $scope.sensors[2]["class"] = "analog";
                 $scope.sensors[3]["class"] = "analog";
+
+                $scope.sensors[2]["type"] = "electricity";
+                $scope.sensors[3]["type"] = "electricity";
             }
         };
 
@@ -98,13 +101,76 @@ angular.module("flmUiApp")
         };
 
         $scope.save = function() {
-            for (var i=1; i<6; i++) {
-                
-            }
+            var tpl =
+                '<div class="modal-header">'+
+                '<h2>Updating sensor configuration</h2>'+
+                '</div>'+
+                '<div class="modal-body">'+
+                '<div class="progress progress-striped active">' +
+                '<div class="bar" style="width: {{progress}}%;"></div>' +
+                '</div>' +
+                '<textarea id="progressLog" readonly="readonly">{{progressLog}}</textarea>'+
+                /*'<p>{{flukso}}</p>' +*/
+                '</div>'+
+                '<div class="modal-footer">'+
+                '<button ng-click="close()" class="btn btn-primary" ng-disabled="closeDisabled">Close</button>'+
+                '</div>';
+
+            var rslv = {
+                flukso: function() {
+                    var flukso = Object();
+
+                    flukso.main = {
+                        max_analog_sensors: $scope.sensors.main.max_analog_sensors,
+                        phase: $scope.sensors.main.phase
+
+                    };
+
+                    for (var i=1; i<6; i++) {
+                        flukso[i.toString()] = {
+                            enable: $scope.sensors[i].enable,
+                            type: $scope.sensors[i].type,
+                            "class": $scope.sensors[i]["class"],
+                            port: $scope.sensors[i].port,
+                            "function": $scope.sensors[i]["function"]
+                        }
+
+                        if ($scope.sensors[i].enable == "1") {
+                            flukso[i.toString()]["function"] = $scope.sensors[i]["function"];
+
+                            switch ($scope.sensors[i]["class"]) {
+                                case "analog":
+                                    flukso[i.toString()].voltage = $scope.sensors[i].voltage;
+                                    flukso[i.toString()].current = $scope.sensors[i].current;
+                                    break;
+                                case "pulse":
+                                    flukso[i.toString()].constant = $scope.sensors[i].constant;
+                                    break;
+                            }
+                        }
+                    }
+
+                    return flukso;
+                }
+            };
+
+            var opts = {
+                backdrop: true,
+                keyboard: false,
+                backdropClick: false,
+                template: tpl,
+                resolve: rslv,
+                controller: "SensorSaveCtrl"
+
+            };
+
+            $dialog.dialog(opts).open()
+                .then(function() {
+                });
         };
 
         /* cookie-based auth seems broken, revert to adding a query param */
-        var url = "/cgi-bin/luci/rpc/uci?auth=" + $cookies.sysauth;
+        var url = "/cgi-bin/luci/rpc/uci?auth=" + $scope.sysauth;
         var request = {
             "method": "get_all",
             "params": ["flukso"],
@@ -135,3 +201,82 @@ angular.module("flmUiApp")
             });
     }
 );
+
+angular.module("flmUiApp")
+    .controller("SensorSaveCtrl", ["$scope", "$location", "$http", "dialog", "flukso",
+    function($scope, $location, $http, dialog, flukso) {
+
+        $scope.flukso = flukso;
+        $scope.closeDisabled = true;
+        $scope.progress = 0;
+        $scope.progressLog = "Saving sensor parameters: ";
+        $scope.close = function(result) {
+            dialog.close();
+        }
+
+        var url = "/cgi-bin/luci/rpc/uci?auth=" + $scope.sysauth;
+ 
+        for (var section in flukso) {
+            var request = {
+                "method": "tset",
+                "params": ["flukso", section, flukso[section]],
+                "id": Date.now()
+            };
+
+            $http.post(url, request)
+                .success(function(response) {
+                    if (response.result) {
+                        $scope.progress += 10;
+                        $scope.progressLog += ".";
+                    } else {
+                        $scope.progressLog += "\n" + response.error;
+                    };
+                }) 
+                .error(function(response) {
+                    $location.path("/");
+                });
+        }
+
+        url = "/cgi-bin/luci/rpc/uci?auth=" + $scope.sysauth;
+        request = {
+            "method": "commit",
+            "params": ["flukso"],
+            "id": Date.now()
+        };
+
+        $http.post(url, request)
+            .success(function(response) {
+                $scope.progress += 10;
+                $scope.progressLog += "\nCommitting changes: ";
+                $scope.progressLog += (response.result || response.error);
+            });
+
+
+        url = "/cgi-bin/luci/rpc/sys?auth=" + $scope.sysauth;
+        request = {
+            "method": "exec",
+            "params": ["fsync"],
+            "id": Date.now()
+        };
+
+        $http.post(url, request)
+            .success(function(response) {
+                $scope.progress += 15;
+                $scope.progressLog += "\nSyncing configuration:";
+                $scope.progressLog += "\n" + (response.result || response.error);
+            });
+
+        url = "/cgi-bin/luci/rpc/sys?auth=" + $scope.sysauth;
+        request = {
+            "method": "exec",
+            "params": ["/etc/init.d/flukso restart"],
+            "id": Date.now()
+        };
+
+        $http.post(url, request)
+            .success(function(response) {
+                $scope.progress += 15;
+                $scope.progressLog += "\nRestarting the Flukso daemon";
+                $scope.closeDisabled = false;
+            });
+    }]);

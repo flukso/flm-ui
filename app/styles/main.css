@@ -15,3 +15,12 @@ input:focus.ng-invalid {
 .error {
     color: #B94A48;
 }
+
+textarea#progressLog {
+    font-family: monospace;
+    font-size: 12px;
+    width: 97%;
+    height: 240px;
+    cursor: auto;
+    background-color: #ffffff;
+}
