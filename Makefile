@@ -20,6 +20,15 @@ MAIN_HTML=views/main.html
 SENSOR_HTML=views/sensor.html
 
 init:
+	@ssh $(USER)@$(HOST) mkdir -p \
+		styles \
+		views \
+		scripts/controllers \
+		components/angular \
+		components/angular-resource \
+		components/angular-cookies \
+		components/angular-sanitize \
+		components/angular-bootstrap
 	@scp app/$(BOOTSTRAP_CSS) $(USER)@$(HOST):/www/$(BOOTSTRAP_CSS)
 	@scp app/$(NG_JS) $(USER)@$(HOST):/www/$(NG_JS)
 	@scp app/$(NG_RESOURCE_JS) $(USER)@$(HOST):/www/$(NG_RESOURCE_JS)
