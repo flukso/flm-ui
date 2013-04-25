@@ -2,7 +2,7 @@
 
 angular.module("flmUiApp")
     .controller("SensorCtrl", function($scope, $dialog, $http, $location) {
-        $scope.debug = true;
+        $scope.debug = false;
         $scope.alerts = [];
         $scope.noOfSensors = 5;
         $scope.i = 1;

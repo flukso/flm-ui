@@ -6,6 +6,8 @@ INDEX=index.html
 BOOTSTRAP_CSS=styles/bootstrap.css
 MAIN_CSS=styles/main.css
 
+IMG=img/flukso.logo.png
+
 NG_JS=components/angular/angular.js
 NG_RESOURCE_JS=components/angular-resource/angular-resource.js
 NG_COOKIES_JS=components/angular-cookies/angular-cookies.js
@@ -23,6 +25,7 @@ init:
 	@ssh $(USER)@$(HOST) mkdir -p \
 		styles \
 		views \
+		img \
 		scripts/controllers \
 		components/angular \
 		components/angular-resource \
@@ -30,6 +33,7 @@ init:
 		components/angular-sanitize \
 		components/angular-bootstrap
 	@scp app/$(BOOTSTRAP_CSS) $(USER)@$(HOST):/www/$(BOOTSTRAP_CSS)
+	@scp app/$(IMG) $(USER)@$(HOST):/www/$(IMG)
 	@scp app/$(NG_JS) $(USER)@$(HOST):/www/$(NG_JS)
 	@scp app/$(NG_RESOURCE_JS) $(USER)@$(HOST):/www/$(NG_RESOURCE_JS)
 	@scp app/$(NG_COOKIES_JS) $(USER)@$(HOST):/www/$(NG_COOKIES_JS)
