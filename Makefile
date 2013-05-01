@@ -23,15 +23,15 @@ SENSOR_HTML=views/sensor.html
 
 init:
 	@ssh $(USER)@$(HOST) mkdir -p \
-		styles \
-		views \
-		img \
-		scripts/controllers \
-		components/angular \
-		components/angular-resource \
-		components/angular-cookies \
-		components/angular-sanitize \
-		components/angular-bootstrap
+		/www/styles \
+		/www/views \
+		/www/img \
+		/www/scripts/controllers \
+		/www/components/angular \
+		/www/components/angular-resource \
+		/www/components/angular-cookies \
+		/www/components/angular-sanitize \
+		/www/components/angular-bootstrap
 	@scp app/$(BOOTSTRAP_CSS) $(USER)@$(HOST):/www/$(BOOTSTRAP_CSS)
 	@scp app/$(IMG) $(USER)@$(HOST):/www/$(IMG)
 	@scp app/$(NG_JS) $(USER)@$(HOST):/www/$(NG_JS)
