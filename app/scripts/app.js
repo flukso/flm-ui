@@ -11,6 +11,10 @@ angular.module('flmUiApp', ['ngCookies', 'ui.bootstrap'])
         templateUrl: 'views/sensor.html',
         controller: 'SensorCtrl'
       })
+      .when('/wifi', {
+        templateUrl: 'views/wifi.html',
+        controller: 'WifiCtrl'
+      })
       .otherwise({
         redirectTo: '/'
       });

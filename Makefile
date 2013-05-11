@@ -17,9 +17,11 @@ NG_BOOTSTRAP_JS=components/angular-bootstrap/ui-bootstrap-tpls.js
 APP_JS=scripts/app.js
 MAIN_JS=scripts/controllers/main.js
 SENSOR_JS=scripts/controllers/sensor.js
+WIFI_JS=scripts/controllers/wifi.js
 
 MAIN_HTML=views/main.html
 SENSOR_HTML=views/sensor.html
+WIFI_HTML=views/wifi.html
 
 init:
 	@ssh $(USER)@$(HOST) mkdir -p \
@@ -46,5 +48,7 @@ load:
 	@scp app/$(APP_JS) $(USER)@$(HOST):/www/$(APP_JS)
 	@scp app/$(MAIN_JS) $(USER)@$(HOST):/www/$(MAIN_JS)
 	@scp app/$(SENSOR_JS) $(USER)@$(HOST):/www/$(SENSOR_JS)
+	@scp app/$(WIFI_JS) $(USER)@$(HOST):/www/$(WIFI_JS)
 	@scp app/$(MAIN_HTML) $(USER)@$(HOST):/www/$(MAIN_HTML)
 	@scp app/$(SENSOR_HTML) $(USER)@$(HOST):/www/$(SENSOR_HTML)
+	@scp app/$(WIFI_HTML) $(USER)@$(HOST):/www/$(WIFI_HTML)

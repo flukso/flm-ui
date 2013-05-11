@@ -1,0 +1,51 @@
+<div>
+    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+</div>
+
+<form name="wifiForm" class="form-horizontal" ng-submit="save()">
+    <div class="well well-large">
+        <div class="control-group">
+            <label for="ssid" class="control-label">SSID</label>
+            <div class="controls">
+                <select name="ssid" ng-model="ssid" ng-required="true">
+                    <option ng-repeat="ap in aps">{{ap.ESSID}}</option>
+                </select>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="frequency" class="control-label">Frequency</label>
+            <div class="controls">
+                <input name="frequency" type="text" ng-model="aps[ssid].Frequency" disabled>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="quality" class="control-label">Signal Quality</label>
+            <div class="controls">
+                <input name="quality" type="text" ng-model="aps[ssid].Quality" disabled>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="encryption" class="control-label">Encryption</label>
+            <div class="controls">
+                <input name="encryption" type="text" ng-model="aps[ssid].Encryption" disabled>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="key" class="control-label">Key</label>
+            <div class="controls">
+                <input name="key" type="text" ng-model="key">
+            </div>
+        </div>
+    </div>
+    <div class="control-group">
+        <div class="controls">
+            <button type="submit" class="btn btn-primary" ng-disabled="wifiForm.$invalid">Save</button>
+        </div>
+    </div>
+</form>
+
+<div ng-show="debug">
+    {{ssid}}
+    {{wireless}}
+    {{aps}}
+</div>
