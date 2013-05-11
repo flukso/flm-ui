@@ -207,12 +207,56 @@ angular.module("flmUiApp")
     .controller("WifiSaveCtrl", ["$scope", "$location", "$http", "dialog", "wireless",
     function($scope, $location, $http, dialog, wireless) {
         $scope.wireless = wireless;
-        $scope.closeDisabled = false;
+        $scope.closeDisabled = true;
         $scope.progress = 0;
-        $scope.progressLog = "Saving wifi parameters.";
+        $scope.progressLog = "Saving wifi parameters: ";
         $scope.close = function(result) {
             dialog.close();
         }
 
+        var url = "/cgi-bin/luci/rpc/uci?auth=" + $scope.sysauth;
+
+        for (var section in wireless) {
+            var request = {
+                "method": "tset",
+                "params": ["wireless", section, wireless[section]],
+                "id": Date.now()
+            };
+
+            $http.post(url, request)
+                .success(function(response) {
+                    $scope.progress += 25;
+                    $scope.progressLog += (response.result || response.error);
+                });
+        }
+
+        url = "/cgi-bin/luci/rpc/uci?auth=" + $scope.sysauth;
+        request = {
+            "method": "commit",
+            "params": ["wireless"],
+            "id": Date.now()
+        };
+
+        $http.post(url, request)
+            .success(function(response) {
+                $scope.progress += 25;
+                $scope.progressLog += "\nCommitting changes: ";
+                $scope.progressLog += (response.result || response.error);
+                $scope.progressLog += "\nRe-initializing wifi stack: ";
+            });
+
+        url = "/cgi-bin/luci/rpc/sys?auth=" + $scope.sysauth;
+        request = {
+            "method": "exec",
+            "params": ["/sbin/wifi up"],
+            "id": Date.now()
+        };
+
+        $http.post(url, request)
+            .success(function(response) {
+                $scope.progress += 50;
+                $scope.progressLog += "\n" + (response.result || response.error);
+                $scope.closeDisabled = false;
+            });
 
     }]);
