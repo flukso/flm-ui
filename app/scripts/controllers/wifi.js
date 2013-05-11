@@ -8,6 +8,30 @@ angular.module("flmUiApp")
         $scope.ssid = "";
         $scope.key = "";
 
+        $scope.disable = function() {
+            if (!$scope.aps[$scope.ssid]) {
+                return true;
+            }
+
+            return $scope.aps[$scope.ssid].Encryption == "none";
+        }
+
+        $scope.pattern = function() {
+            if (!$scope.aps[$scope.ssid]) {
+                return /.*/;
+            }
+
+            switch ($scope.aps[$scope.ssid].Encryption) {
+                case "none":
+                    return /.*/; /* don't care */
+                case "wep":
+                    return /(^.{5}$)|(^.{13}$)|(^[a-fA-F0-9]{10}$)|(^[a-fA-F0-9]{26}$)/;
+                case "wpa":
+                case "wpa2":
+                    return /^.{8,63}$/;
+            }
+        };
+
         var url = "/cgi-bin/luci/rpc/sys?auth=" + $scope.sysauth;
         var request = {
             "method": "wifi.iwscan",

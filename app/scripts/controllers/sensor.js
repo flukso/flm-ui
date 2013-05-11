@@ -47,7 +47,7 @@ angular.module("flmUiApp")
 
             /* bypass regex validation by allowing any pattern */
             if (disabled) {
-                return /[\w\W]*/;
+                return /.*/;
             }
 
             switch (param) {

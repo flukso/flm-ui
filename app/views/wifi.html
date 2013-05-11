@@ -33,7 +33,10 @@
         <div class="control-group">
             <label for="key" class="control-label">Key</label>
             <div class="controls">
-                <input name="key" type="text" ng-model="key">
+                <input name="key" type="text" ng-model="key" ng-pattern="pattern()" ng-disabled="disable()" ng-required="!disable()">
+                <span class="help-inline error" ng-show="wifiForm.key.$error.required">Required field.</span>
+                <span class="help-inline error" ng-show="wifiForm.key.$error.pattern">Wrong format. Use either 5/13 ASCII or 10/26 HEX characters as WEP key. A valid ASCII-based key will be translated into a HEX-based one. For WPA(2)-PSK encrypted networks, please enter your 8-to-63-character passphrase.
+            </span>
             </div>
         </div>
     </div>
