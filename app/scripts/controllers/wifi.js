@@ -1,7 +1,7 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("WifiCtrl", function($scope, $http, $location) {
+    .controller("WifiCtrl", function($scope, $dialog, $http, $location) {
         $scope.debug = true;
         $scope.aps = {};
         $scope.wireless = {};
@@ -30,6 +30,84 @@ angular.module("flmUiApp")
                 case "wpa2":
                     return /^.{8,63}$/;
             }
+        };
+
+        $scope.save = function() {
+            var tpl =
+                '<div class="modal-header">'+
+                '<h2>Updating wifi configuration</h2>'+
+                '</div>'+
+                '<div class="modal-body">'+
+                '<div class="progress progress-striped active">' +
+                '<div class="bar" style="width: {{progress}}%;"></div>' +
+                '</div>' +
+                '<textarea id="progressLog" readonly="readonly">{{progressLog}}</textarea>'+
+                '<p>{{wireless}}</p>' +
+                '</div>'+
+                '<div class="modal-footer">'+
+                '<button ng-click="close()" class="btn btn-primary" ng-disabled="closeDisabled">Close</button>'+
+                '</div>';
+
+            var rslv = {
+                wireless: function() {
+                    var wireless = {};
+
+                    function ascii2hex(str) {
+                        var hexstr = "";
+                        for (var i=0; i<str.length; i++) {
+                            hexstr += str.charCodeAt(i).toString(16);
+                        }
+                        return hexstr;
+                    }
+
+                    function wpa2psk(encr) {
+                        switch (encr) {
+                            case "wpa":
+                                return "psk";
+                            case "wpa2":
+                                return "psk2";
+                        }
+                        return encr;
+                    }
+
+                    /* sanitize the key entry */
+                    switch ($scope.aps[$scope.ssid].Encryption) {
+                        case "none":
+                            $scope.key = "";
+                            break;
+                        case "wep":
+                            switch ($scope.key.length) {
+                                case 5:
+                                case 13:
+                                    $scope.key = ascii2hex($scope.key);
+                            }
+                            break;
+                    }
+
+                    wireless[$scope.section] = {
+                        ssid: $scope.ssid,
+                        encryption: wpa2psk($scope.aps[$scope.ssid].Encryption),
+                        key: $scope.key
+                    };
+
+                    return wireless;
+                }
+            };
+
+            var opts = {
+                backdrop: true,
+                keyboard: false,
+                backdropClick: false,
+                template: tpl,
+                resolve: rslv,
+                controller: "WifiSaveCtrl"
+
+            };
+
+            $dialog.dialog(opts).open()
+                .then(function() {
+                });
+ 
         };
 
         var url = "/cgi-bin/luci/rpc/sys?auth=" + $scope.sysauth;
@@ -110,6 +188,7 @@ angular.module("flmUiApp")
                             }
                         }
 
+                        $scope.section = section;
                         $scope.ssid = response.result[section].ssid;
                         $scope.key = response.result[section].key;
                     }
@@ -123,3 +202,17 @@ angular.module("flmUiApp")
 
     }
 );
+
+angular.module("flmUiApp")
+    .controller("WifiSaveCtrl", ["$scope", "$location", "$http", "dialog", "wireless",
+    function($scope, $location, $http, dialog, wireless) {
+        $scope.wireless = wireless;
+        $scope.closeDisabled = false;
+        $scope.progress = 0;
+        $scope.progressLog = "Saving wifi parameters.";
+        $scope.close = function(result) {
+            dialog.close();
+        }
+
+
+    }]);

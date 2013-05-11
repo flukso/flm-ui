@@ -118,7 +118,7 @@ angular.module("flmUiApp")
 
             var rslv = {
                 flukso: function() {
-                    var flukso = Object();
+                    var flukso = {};
 
                     flukso.main = {
                         max_analog_sensors: $scope.sensors.main.max_analog_sensors,
