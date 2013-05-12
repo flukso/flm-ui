@@ -2,7 +2,7 @@
 
 angular.module("flmUiApp")
     .controller("WifiCtrl", function($scope, $dialog, $http, $location) {
-        $scope.debug = true;
+        $scope.debug = false;
         $scope.aps = {};
         $scope.wireless = {};
         $scope.ssid = "";
@@ -42,7 +42,7 @@ angular.module("flmUiApp")
                 '<div class="bar" style="width: {{progress}}%;"></div>' +
                 '</div>' +
                 '<textarea id="progressLog" readonly="readonly">{{progressLog}}</textarea>'+
-                '<p>{{wireless}}</p>' +
+                /*'<p>{{wireless}}</p>' +*/
                 '</div>'+
                 '<div class="modal-footer">'+
                 '<button ng-click="close()" class="btn btn-primary" ng-disabled="closeDisabled">Close</button>'+
@@ -106,8 +106,34 @@ angular.module("flmUiApp")
 
             $dialog.dialog(opts).open()
                 .then(function() {
+                    var url = "/cgi-bin/luci/rpc/uci?auth=" + $scope.sysauth;
+                    var request = {
+                        "method": "get_all",
+                        "params": ["wireless"],
+                        "id": Date.now()
+                    };
+
+                    $http.post(url, request)
+                        .success(function(response) {
+                            if (!response.result) {
+                                $scope.alerts.push({
+                                    type: "error",
+                                    msg: response.error
+                                });
+                                return;
+                            }
+
+                            angular.forEach(response.result, function(value, section) {
+                                if (section != "wifi0") {
+                                    $scope.section = section;
+                                }
+                            });
+                        })
+                        .error(function(response) {
+                            /* an invalid auth seems to trigger a 500 */
+                            $location.path("/");
+                        });
                 });
- 
         };
 
         var url = "/cgi-bin/luci/rpc/sys?auth=" + $scope.sysauth;
@@ -125,7 +151,7 @@ angular.module("flmUiApp")
                         msg: response.error
                     });
                     return;
-                };
+                }
 
                 angular.forEach(response.result.ath0, function(ap, key) {
                     $scope.aps[ap.ESSID] = ap;
@@ -188,9 +214,12 @@ angular.module("flmUiApp")
                             }
                         }
 
-                        $scope.section = section;
                         $scope.ssid = response.result[section].ssid;
                         $scope.key = response.result[section].key;
+                    }
+
+                    if (section != "wifi0") {
+                        $scope.section = section;
                     }
                 });
             })
@@ -257,6 +286,10 @@ angular.module("flmUiApp")
                 $scope.progress += 50;
                 $scope.progressLog += "\n" + (response.result || response.error);
                 $scope.closeDisabled = false;
+            })
+            .error(function(response) {
+                $scope.progress += 50;
+                $scope.progressLog += "\nHTTP error. Most likely due to an incorrect wifi key or an out-of-range access point."; 
+                $scope.closeDisabled = false;
             });
-
     }]);
