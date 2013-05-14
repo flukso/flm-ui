@@ -3,10 +3,15 @@
 angular.module("flmUiApp")
     .controller("WifiCtrl", function($scope, $dialog, $http, $location) {
         $scope.debug = false;
+        $scope.alerts = [];
         $scope.aps = {};
         $scope.wireless = {};
         $scope.ssid = "";
         $scope.key = "";
+
+        $scope.closeAlert = function(index) {
+            $scope.alerts.splice(index, 1);
+        };
 
         $scope.disable = function() {
             if (!$scope.aps[$scope.ssid]) {
