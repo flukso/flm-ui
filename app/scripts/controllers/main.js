@@ -21,7 +21,7 @@ angular.module('flmUiApp')
         $http.post(url, request).success(function(response) {
             if (response.result) {
                 $rootScope.sysauth = response.result;
-                $location.path("/sensor");
+                $location.path("/status");
             } else {
                 $scope.alerts.push({
                     type: "error",

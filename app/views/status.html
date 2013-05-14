@@ -1,0 +1,89 @@
+<div>
+    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+</div>
+
+<form name="statusForm" class="form-horizontal">
+    <div class="well well-large">
+        <h4>System</h4>
+        <div class="control-group">
+            <label for="serial" class="control-label">Serial</label>
+            <div class="controls">
+                <span name="serial" class="input uneditable-input">{{system.serial}}</span>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="model" class="control-label">Model</label>
+            <div class="controls">
+                <span name="model" class="input uneditable-input">{{system.model}}</span>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="hostname" class="control-label">Hostname</label>
+            <div class="controls">
+                <span name="hostname" class="input uneditable-input">{{system.hostname}}</span>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="version" class="control-label">Firmware version</label>
+            <div class="controls">
+                <span name="version" class="input uneditable-input">{{system.version}}</span>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="time" class="control-label">Time</label>
+            <div class="controls">
+                <span name="time" class="input uneditable-input">{{time}}</span>
+                <span class="help-inline error" ng-show="timeSyncErr">A correct time setting requires internet connectivity.</span>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="uptime" class="control-label">Uptime</label>
+            <div class="controls">
+                <span name="uptime" class="input uneditable-input">{{uptime}}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="well well-large">
+        <h4>Network</h4>
+        <div class="control-group">
+            <label for="mode" class="control-label">Reporting mode</label>
+            <div class="controls">
+                <span name="mode" class="input uneditable-input">{{mode}}</span>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="ip" class="control-label">IP address</label>
+            <div class="controls">
+                <span name="ip" class="input uneditable-input">{{ip}}</span>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="ping" class="control-label">Flukso.net ping test</label>
+            <div class="controls">
+                <span name="ping" class="input uneditable-input">{{ping}}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="well well-large">
+        <h4>Sensor config synchronisation</h4>
+        <div class="control-group">
+            <label for="synctime" class="control-label">Last</label>
+            <div class="controls">
+                <span name="synctime" class="input uneditable-input">{{sync.time}}</span>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="syncstatus" class="control-label">Status</label>
+            <div class="controls">
+                <span name="syncstatus" class="input uneditable-input">{{sync.status}}</span>
+            </div>
+        </div>
+    </div>
+</form>
+ 
+<div ng-show="debug">
+    <p>{{system}}</p>
+    <p>{{defaultroute}}</p>
+<div>
