@@ -6,14 +6,24 @@ angular.module("flmUiApp")
         $scope.alerts = [];
         $scope.system = {};
         $scope.time = "";
-        $scope.timeSyncErr = false;
         $scope.uptime = "";
         $scope.defaultroute = {};
         $scope.mode = "";
+        $scope.iwconfig = {};
+        $scope.ssid = "";
+        $scope.quality = "";
         $scope.ip = "";
         $scope.ping = "";
         $scope.sync = {};
 
+        $scope.timeSyncErr = false;
+        $scope.assocErr = false;
+        $scope.ipErr = false;
+        $scope.pingErr = false;
+        $scope.syncErr = false;
+        $scope.serverSyncErr = false;
+        $scope.noSync = false;
+ 
         $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
@@ -65,10 +75,51 @@ angular.module("flmUiApp")
             }
         );
 
+        flmRpc.call("uci", "get_all", ["network"]).then(
+            function(network) {
+                $scope.mode = network.wan.ifname == "ath0" ? "wifi" : "ethernet";
+            },
+            function(error) {
+                $scope.alerts.push({
+                    type: "error",
+                    msg: error
+                });
+            }
+        );
+
+        flmRpc.call("sys", "wifi.getiwconfig", []).then(
+            function(iwconfig) {
+                $scope.iwconfig = iwconfig;
+
+                if (iwconfig.ath0) {
+                    $scope.ssid = iwconfig.ath0["ESSID"];
+                    $scope.quality = iwconfig.ath0["Access Point"] == "Not-Associated" ?
+                        "not associated" : iwconfig.ath0["Link Quality"];
+
+                    if (iwconfig.ath0["Access Point"] == "Not-Associated") {
+                        $scope.assocErr = true;
+                    }
+                }
+            },
+            function(error) {
+                $scope.alerts.push({
+                    type: "error",
+                    msg: error
+                });
+            }
+        );
+
         flmRpc.call("sys", "net.defaultroute", []).then(
             function(defaultroute) {
+                if (!defaultroute) {
+                    $scope.ipErr = true;
+                    /* no defaultroute = no need to even try pinging home */
+                    $scope.pingErr = true;
+                    $scope.ping = "aborted";
+                    return;
+                }
+
                 $scope.defaultroute = defaultroute;
-                $scope.mode = defaultroute.device == "ath0" ? "wifi" : "ethernet";
 
                 var ipHigh16 = defaultroute.gateway[1][0];
                 var ipLow16  = defaultroute.gateway[1][1];
@@ -79,18 +130,19 @@ angular.module("flmUiApp")
                 var ipByte3 = (ipLow16 - ipByte4) / 256;
 
                 $scope.ip = ipByte1 + "." + ipByte2 + "." + ipByte3 + "." + ipByte4;
-            },
-            function(error) {
-                $scope.alerts.push({
-                    type: "error",
-                    msg: error
-                });
-            }
-        );
-        
-        flmRpc.call("sys", "net.pingtest", ["flukso.net"]).then(
-            function(code) {
-                $scope.ping = code == 0 ? "successful" : "failed";
+
+                flmRpc.call("sys", "net.pingtest", ["flukso.net"]).then(
+                    function(code) {
+                        $scope.ping = code == 0 ? "successful" : "failed";
+                        $scope.pingErr = code!= 0;
+                    },
+                    function(error) {
+                        $scope.alerts.push({
+                            type: "error",
+                            msg: error
+                        });
+                    }
+                );
             },
             function(error) {
                 $scope.alerts.push({
@@ -104,6 +156,9 @@ angular.module("flmUiApp")
             function(flukso) {
                 var time = new Date(flukso.fsync.time * 1e3);
 
+                $scope.syncErr = flukso.fsync.exit_status > 0;
+                $scope.serverSyncErr = flukso.fsync.exit_status == 7;
+                $scope.noSync = flukso.fsync.exit_status == -1;
                 $scope.sync = {
                     time: time.toLocaleString(),
                     status: flukso.fsync.exit_string

@@ -34,3 +34,7 @@ textarea#progressLog {
     cursor: auto;
     background-color: #ffffff;
 }
+
+span.label {
+    float: right;
+}

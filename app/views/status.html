@@ -4,6 +4,8 @@
 
 <form name="statusForm" class="form-horizontal">
     <div class="well well-large">
+        <span class="label label-success" ng-show="!timeSyncErr">OK</span>
+        <span class="label label-important" ng-show="timeSyncErr">ERROR</span>
         <h4>System</h4>
         <div class="control-group">
             <label for="serial" class="control-label">Serial</label>
@@ -33,7 +35,8 @@
             <label for="time" class="control-label">Time</label>
             <div class="controls">
                 <span name="time" class="input uneditable-input">{{time}}</span>
-                <span class="help-inline error" ng-show="timeSyncErr">A correct time setting requires internet connectivity.</span>
+                <span class="help-inline error" ng-show="timeSyncErr && pingErr">A correct time setting requires internet connectivity.</span>
+                <span class="help-inline error" ng-show="timeSyncErr && !pingErr">Incorrect system time.</span>
             </div>
         </div>
         <div class="control-group">
@@ -45,6 +48,8 @@
     </div>
 
     <div class="well well-large">
+        <span class="label label-success" ng-show="!ipErr && !pingErr">OK</span>
+        <span class="label label-important" ng-show="ipErr || pingErr">ERROR</span>
         <h4>Network</h4>
         <div class="control-group">
             <label for="mode" class="control-label">Reporting mode</label>
@@ -52,21 +57,39 @@
                 <span name="mode" class="input uneditable-input">{{mode}}</span>
             </div>
         </div>
+        <div class="control-group" ng-show="mode == 'wifi'">
+            <label for="ssid" class="control-label">SSID</label>
+            <div class="controls">
+                <span name="ssid" class="input uneditable-input">{{ssid}}</span>
+            </div>
+        </div>
+        <div class="control-group" ng-show="mode == 'wifi'">
+            <label for="quality" class="control-label">Link quality</label>
+            <div class="controls">
+                <span name="quality" class="input uneditable-input">{{quality}}</span>
+                <span class="help-inline error" ng-show="assocErr">The access point could be out of range or powered off.</span>
+            </div>
+        </div>
         <div class="control-group">
             <label for="ip" class="control-label">IP address</label>
             <div class="controls">
                 <span name="ip" class="input uneditable-input">{{ip}}</span>
+                <span class="help-inline error" ng-show="ipErr && !assocErr && mode=='wifi'">No defaultroute entry. Double-check the wifi key and the router's DHCP settings.</span>
+                <span class="help-inline error" ng-show="ipErr && mode=='ethernet'">No defaultroute entry. Check the DHCP settings on the router.</span>
             </div>
         </div>
         <div class="control-group">
             <label for="ping" class="control-label">Flukso.net ping test</label>
             <div class="controls">
                 <span name="ping" class="input uneditable-input">{{ping}}</span>
+                <span class="help-inline error" ng-show="pingErr && !ipErr && !assocErr">Cannot reach the Flukso server. Is the internet uplink live?</span>
             </div>
         </div>
     </div>
 
     <div class="well well-large">
+        <span class="label label-success" ng-show="!syncErr">OK</span>
+        <span class="label label-important" ng-show="syncErr">ERROR</span>
         <h4>Sensor config synchronisation</h4>
         <div class="control-group">
             <label for="synctime" class="control-label">Last</label>
@@ -78,7 +101,10 @@
             <label for="syncstatus" class="control-label">Status</label>
             <div class="controls">
                 <span name="syncstatus" class="input uneditable-input">{{sync.status}}</span>
-            </div>
+                <span class="help-inline" ng-show="noSync && !pingErr">Now's the time to configure the sensors.</span>
+                <span class="help-inline error" ng-show="serverSyncErr">Make sure the FLM is connected to the internet before saving the sensors.</span>
+                <span class="help-inline error" ng-show="syncErr && !serverSyncErr">Internal error. Please report this error message to Flukso.</span>
+             </div>
         </div>
     </div>
 </form>
@@ -86,4 +112,5 @@
 <div ng-show="debug">
     <p>{{system}}</p>
     <p>{{defaultroute}}</p>
+    <p>{{iwconfig}}</p>
 <div>
