@@ -1,7 +1,7 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("StatusCtrl", function($scope, $http, $location, flmRpc) {
+    .controller("StatusCtrl", function($scope, $http, flmRpc) {
         $scope.debug = false;
         $scope.alerts = [];
         $scope.system = {};
@@ -28,6 +28,13 @@ angular.module("flmUiApp")
             $scope.alerts.splice(index, 1);
         };
 
+        function pushError(error) {
+            $scope.alerts.push({
+                type: "error",
+                msg: error
+            });
+        };
+
         flmRpc.call("uci", "get_all", ["system"]).then(
             function(system) {
                 angular.forEach(system, function(value, section) {
@@ -36,12 +43,7 @@ angular.module("flmUiApp")
                     }
                 });
             },
-            function(error) {
-                $scope.alerts.push({
-                    type: "error",
-                    msg: error
-                });
-            }
+            pushError
         );
 
         flmRpc.call("sys", "exec", ["date +'%s'"]).then(
@@ -50,12 +52,7 @@ angular.module("flmUiApp")
                 $scope.time = time.toLocaleString();
                 $scope.timeSyncErr = unixTime < 1234567890;
             },
-            function(error) {
-                $scope.alerts.push({
-                    type: "error",
-                    msg: error
-                });
-            }
+            pushError
         );
 
         flmRpc.call("sys", "uptime", []).then(
@@ -67,24 +64,14 @@ angular.module("flmUiApp")
 
                 $scope.uptime = days + "days " + h + "h " + min + "min " + s + "s";
             },
-            function(error) {
-                $scope.alerts.push({
-                    type: "error",
-                    msg: error
-                });
-            }
+            pushError
         );
 
         flmRpc.call("uci", "get_all", ["network"]).then(
             function(network) {
                 $scope.mode = network.wan.ifname == "ath0" ? "wifi" : "ethernet";
             },
-            function(error) {
-                $scope.alerts.push({
-                    type: "error",
-                    msg: error
-                });
-            }
+            pushError
         );
 
         flmRpc.call("sys", "wifi.getiwconfig", []).then(
@@ -101,12 +88,7 @@ angular.module("flmUiApp")
                     }
                 }
             },
-            function(error) {
-                $scope.alerts.push({
-                    type: "error",
-                    msg: error
-                });
-            }
+            pushError
         );
 
         flmRpc.call("sys", "net.defaultroute", []).then(
@@ -136,20 +118,10 @@ angular.module("flmUiApp")
                         $scope.ping = code == 0 ? "successful" : "failed";
                         $scope.pingErr = code!= 0;
                     },
-                    function(error) {
-                        $scope.alerts.push({
-                            type: "error",
-                            msg: error
-                        });
-                    }
+                    pushError
                 );
             },
-            function(error) {
-                $scope.alerts.push({
-                    type: "error",
-                    msg: error
-                });
-            }
+            pushError
         );
 
         flmRpc.call("uci", "get_all", ["flukso"]).then(
@@ -164,12 +136,7 @@ angular.module("flmUiApp")
                     status: flukso.fsync.exit_string
                 }
             },
-            function(error) {
-                $scope.alerts.push({
-                    type: "error",
-                    msg: error
-                });
-            }
+            pushError
         );
 
     }

@@ -1,7 +1,7 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("SensorCtrl", function($scope, $dialog, $http, $location) {
+    .controller("SensorCtrl", function($scope, $dialog, $http, flmRpc) {
         $scope.debug = false;
         $scope.alerts = [];
         $scope.noOfSensors = 5;
@@ -9,6 +9,13 @@ angular.module("flmUiApp")
 
         $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
+        };
+
+        function pushError(error) {
+            $scope.alerts.push({
+                type: "error",
+                msg: error
+            });
         };
 
         $scope.disable = function(param) {
@@ -169,43 +176,24 @@ angular.module("flmUiApp")
                 });
         };
 
-        /* cookie-based auth seems broken, revert to adding a query param */
-        var url = "/cgi-bin/luci/rpc/uci?auth=" + $scope.sysauth;
-        var request = {
-            "method": "get_all",
-            "params": ["flukso"],
-            "id": Date.now()
-        };
-
-        $http.post(url, request)
-            .success(function(response) {
-                if (!response.result) {
-                    $scope.alerts.push({
-                        type: "error",
-                        msg: response.error
-                    });
-                    return;
-                };
-
-                $scope.sensors = new Object();
-                $scope.sensors.main = response.result.main;
-                $scope.sensors.daemon = response.result.daemon;
+        flmRpc.call("uci", "get_all", ["flukso"]).then(
+            function(flukso) {
+                $scope.sensors = {};
+                $scope.sensors.main = flukso.main;
+                $scope.sensors.daemon = flukso.daemon;
 
                 for (var i=1; i<6; i++) {
-                    $scope.sensors[i] = response.result[i.toString()];
+                    $scope.sensors[i] = flukso[i.toString()];
                 }
-            })
-            .error(function(response) {
-                /* an invalid auth seems to trigger a 500 */
-                $location.path("/");
-            });
+            },
+            pushError
+        );
     }
 );
 
 angular.module("flmUiApp")
-    .controller("SensorSaveCtrl", ["$scope", "$location", "$http", "dialog", "flukso",
-    function($scope, $location, $http, dialog, flukso) {
-
+    .controller("SensorSaveCtrl", ["$scope", "$http", "flmRpc", "dialog", "flukso",
+    function($scope, $http, flmRpc, dialog, flukso) {
         $scope.flukso = flukso;
         $scope.closeDisabled = true;
         $scope.progress = 0;
@@ -214,69 +202,47 @@ angular.module("flmUiApp")
             dialog.close();
         }
 
-        var url = "/cgi-bin/luci/rpc/uci?auth=" + $scope.sysauth;
- 
         for (var section in flukso) {
-            var request = {
-                "method": "tset",
-                "params": ["flukso", section, flukso[section]],
-                "id": Date.now()
-            };
-
-            $http.post(url, request)
-                .success(function(response) {
-                    if (response.result) {
-                        $scope.progress += 10;
-                        $scope.progressLog += ".";
-                    } else {
-                        $scope.progressLog += "\n" + response.error;
-                    };
-                }) 
-                .error(function(response) {
-                    $location.path("/");
-                });
+            flmRpc.call("uci", "tset", ["flukso", section, flukso[section]]).then(
+                function(result) {
+                    $scope.progress += 10;
+                    $scope.progressLog += ".";
+                },
+                function(error) {
+                    $scope.progressLog += "\n" + error;
+                }
+            ); 
         }
 
-        url = "/cgi-bin/luci/rpc/uci?auth=" + $scope.sysauth;
-        request = {
-            "method": "commit",
-            "params": ["flukso"],
-            "id": Date.now()
-        };
-
-        $http.post(url, request)
-            .success(function(response) {
+        flmRpc.call("uci", "commit", ["flukso"]).then(
+            function(result) {
                 $scope.progress += 10;
-                $scope.progressLog += "\nCommitting changes: ";
-                $scope.progressLog += (response.result || response.error);
-            });
+                $scope.progressLog += "\nCommitting changes: " + result;
+            },
+            function(error) {
+                $scope.progressLog += "\nCommitting changes: " + error;
+            }
+        ); 
 
-
-        url = "/cgi-bin/luci/rpc/sys?auth=" + $scope.sysauth;
-        request = {
-            "method": "exec",
-            "params": ["fsync"],
-            "id": Date.now()
-        };
-
-        $http.post(url, request)
-            .success(function(response) {
+        flmRpc.call("sys", "exec", ["fsync"]).then(
+            function(result) {
                 $scope.progress += 15;
-                $scope.progressLog += "\nSyncing configuration:";
-                $scope.progressLog += "\n" + (response.result || response.error);
-            });
+                $scope.progressLog += "\nSyncing configuration: " + result;
+            },
+            function(error) {
+                $scope.progressLog += "\nSyncing configuration: " + error;
+            }
+        ); 
 
-        url = "/cgi-bin/luci/rpc/sys?auth=" + $scope.sysauth;
-        request = {
-            "method": "exec",
-            "params": ["/etc/init.d/flukso restart"],
-            "id": Date.now()
-        };
-
-        $http.post(url, request)
-            .success(function(response) {
+        flmRpc.call("sys", "exec", ["/etc/init.d/flukso restart"]).then(
+            function(result) {
                 $scope.progress += 15;
-                $scope.progressLog += "\nRestarting the Flukso daemon";
+                $scope.progressLog += "\nRestarting the Flukso daemon: ok";
                 $scope.closeDisabled = false;
-            });
+            },
+            function(error) {
+                $scope.progressLog += "\nRestarting the Flukso daemon: " + error;
+                $scope.closeDisabled = false;
+            }
+        ); 
     }]);

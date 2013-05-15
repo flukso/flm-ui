@@ -1,7 +1,7 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("WifiCtrl", function($scope, $dialog, $http, $location) {
+    .controller("WifiCtrl", function($scope, $dialog, $http, flmRpc) {
         $scope.debug = false;
         $scope.alerts = [];
         $scope.aps = {};
@@ -11,6 +11,13 @@ angular.module("flmUiApp")
 
         $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
+        };
+
+        function pushError(error) {
+            $scope.alerts.push({
+                type: "error",
+                msg: error
+            });
         };
 
         $scope.disable = function() {
@@ -111,54 +118,22 @@ angular.module("flmUiApp")
 
             $dialog.dialog(opts).open()
                 .then(function() {
-                    var url = "/cgi-bin/luci/rpc/uci?auth=" + $scope.sysauth;
-                    var request = {
-                        "method": "get_all",
-                        "params": ["wireless"],
-                        "id": Date.now()
-                    };
-
-                    $http.post(url, request)
-                        .success(function(response) {
-                            if (!response.result) {
-                                $scope.alerts.push({
-                                    type: "error",
-                                    msg: response.error
-                                });
-                                return;
-                            }
-
-                            angular.forEach(response.result, function(value, section) {
+                    flmRpc.call("uci", "get_all", ["wireless"]).then(
+                        function(wireless) {
+                            angular.forEach(wireless, function(value, section) {
                                 if (section != "wifi0") {
                                     $scope.section = section;
                                 }
                             });
-                        })
-                        .error(function(response) {
-                            /* an invalid auth seems to trigger a 500 */
-                            $location.path("/");
-                        });
+                        },
+                        pushError
+                    );
                 });
         };
 
-        var url = "/cgi-bin/luci/rpc/sys?auth=" + $scope.sysauth;
-        var request = {
-            "method": "wifi.iwscan",
-            "params": [],
-            "id": Date.now()
-        };
-
-        $http.post(url, request)
-            .success(function(response) {
-                if (!response.result) {
-                    $scope.alerts.push({
-                        type: "error",
-                        msg: response.error
-                    });
-                    return;
-                }
-
-                angular.forEach(response.result.ath0, function(ap, key) {
+        flmRpc.call("sys", "wifi.iwscan", []).then(
+            function(iwscan) {
+                angular.forEach(iwscan.ath0, function(ap, key) {
                     $scope.aps[ap.ESSID] = ap;
 
                     if (ap["Encryption key"] == "off") {
@@ -175,71 +150,49 @@ angular.module("flmUiApp")
                             }
                         }
                     }
-
                 });
-            })
-            .error(function(response) {
-                /* an invalid auth seems to trigger a 500 */
-                $location.path("/");
-            });
+            },
+            pushError
+        );
 
-        url = "/cgi-bin/luci/rpc/uci?auth=" + $scope.sysauth;
-        request = {
-            "method": "get_all",
-            "params": ["wireless"],
-            "id": Date.now()
-        };
+        flmRpc.call("uci", "get_all", ["wireless"]).then(
+            function(wireless) {
+                $scope.wireless = wireless;
 
-        $http.post(url, request)
-            .success(function(response) {
-                if (!response.result) {
-                    $scope.alerts.push({
-                        type: "error",
-                        msg: response.error
-                    });
-                    return;
-                }
-
-                $scope.wireless = response.result;
-
-                angular.forEach(response.result, function(value, section) {
-                    if (section != "wifi0" && response.result[section].ssid != "zwaluw") {
+                angular.forEach(wireless, function(value, section) {
+                    if (section != "wifi0" && wireless[section].ssid != "zwaluw") {
                         /* add the ssid to the scan list if it's not present yet */
-                        if (!$scope.aps[response.result[section].ssid]) {
-                            $scope.aps[response.result[section].ssid] =
-                                {"ESSID": response.result[section].ssid};
+                        if (!$scope.aps[wireless[section].ssid]) {
+                            $scope.aps[wireless[section].ssid] =
+                                {"ESSID": wireless[section].ssid};
 
-                            if (response.result[section].encryption == "psk") {
-                                $scope.aps[response.result[section].ssid].Encryption = "wpa";
-                            } else if (response.result[section].encryption == "psk2") {
-                                $scope.aps[response.result[section].ssid].Encryption = "wpa2";
+                            if (wireless[section].encryption == "psk") {
+                                $scope.aps[wireless[section].ssid].Encryption = "wpa";
+                            } else if (wireless[section].encryption == "psk2") {
+                                $scope.aps[wireless[section].ssid].Encryption = "wpa2";
                             } else {
-                                $scope.aps[response.result[section].ssid].Encryption =
-                                    response.result[section].encryption;
+                                $scope.aps[wireless[section].ssid].Encryption =
+                                    wireless[section].encryption;
                             }
                         }
 
-                        $scope.ssid = response.result[section].ssid;
-                        $scope.key = response.result[section].key;
+                        $scope.ssid = wireless[section].ssid;
+                        $scope.key = wireless[section].key;
                     }
 
                     if (section != "wifi0") {
                         $scope.section = section;
                     }
                 });
-            })
-            .error(function(response) {
-                /* an invalid auth seems to trigger a 500 */
-                $location.path("/");
-            });
-
-
+            },
+            pushError
+        );
     }
 );
 
 angular.module("flmUiApp")
-    .controller("WifiSaveCtrl", ["$scope", "$location", "$http", "dialog", "wireless",
-    function($scope, $location, $http, dialog, wireless) {
+    .controller("WifiSaveCtrl", ["$scope", "$http", "flmRpc", "dialog", "wireless",
+    function($scope, $http, flmRpc, dialog, wireless) {
         $scope.wireless = wireless;
         $scope.closeDisabled = true;
         $scope.progress = 0;
@@ -248,39 +201,33 @@ angular.module("flmUiApp")
             dialog.close();
         }
 
-        var url = "/cgi-bin/luci/rpc/uci?auth=" + $scope.sysauth;
-
         for (var section in wireless) {
-            var request = {
-                "method": "tset",
-                "params": ["wireless", section, wireless[section]],
-                "id": Date.now()
-            };
-
-            $http.post(url, request)
-                .success(function(response) {
+            flmRpc.call("uci", "tset", ["wireless", section, wireless[section]]).then(
+                function(result) {
                     $scope.progress += 25;
-                    $scope.progressLog += (response.result || response.error);
-                });
+                    $scope.progressLog += result;
+                },
+                function(error) {
+                    $scope.progressLog += error;
+                }
+            );
         }
 
-        url = "/cgi-bin/luci/rpc/uci?auth=" + $scope.sysauth;
-        request = {
-            "method": "commit",
-            "params": ["wireless"],
-            "id": Date.now()
-        };
-
-        $http.post(url, request)
-            .success(function(response) {
+        flmRpc.call("uci", "commit", ["wireless"]).then(
+            function(result) {
                 $scope.progress += 25;
-                $scope.progressLog += "\nCommitting changes: ";
-                $scope.progressLog += (response.result || response.error);
+                $scope.progressLog += "\nCommitting changes: " + result;
                 $scope.progressLog += "\nRe-initializing wifi stack: ";
-            });
+            },
+            function(error) {
+                $scope.progressLog += "\nCommitting changes: " + error;
+                $scope.progressLog += "\nRe-initializing wifi stack: ";
+            }
+        );
 
-        url = "/cgi-bin/luci/rpc/sys?auth=" + $scope.sysauth;
-        request = {
+        /* using a special error function here, so we cannot invoke flmRpc */
+        var url = "/cgi-bin/luci/rpc/sys?auth=" + $scope.sysauth;
+        var request = {
             "method": "exec",
             "params": ["/sbin/wifi up"],
             "id": Date.now()
