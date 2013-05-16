@@ -20,12 +20,14 @@ SENSOR_JS=scripts/controllers/sensor.js
 WIFI_JS=scripts/controllers/wifi.js
 STATUS_JS=scripts/controllers/status.js
 SERVICES_JS=scripts/controllers/services.js
+SYSLOG_JS=scripts/controllers/syslog.js
 
 MAIN_HTML=views/main.html
 SENSOR_HTML=views/sensor.html
 WIFI_HTML=views/wifi.html
 STATUS_HTML=views/status.html
 SERVICES_HTML=views/services.html
+SYSLOG_HTML=views/syslog.html
 
 init:
 	@ssh $(USER)@$(HOST) mkdir -p \
@@ -55,8 +57,10 @@ load:
 	@scp app/$(WIFI_JS) $(USER)@$(HOST):/www/$(WIFI_JS)
 	@scp app/$(STATUS_JS) $(USER)@$(HOST):/www/$(STATUS_JS)
 	@scp app/$(SERVICES_JS) $(USER)@$(HOST):/www/$(SERVICES_JS)
+	@scp app/$(SYSLOG_JS) $(USER)@$(HOST):/www/$(SYSLOG_JS)
 	@scp app/$(MAIN_HTML) $(USER)@$(HOST):/www/$(MAIN_HTML)
 	@scp app/$(SENSOR_HTML) $(USER)@$(HOST):/www/$(SENSOR_HTML)
 	@scp app/$(WIFI_HTML) $(USER)@$(HOST):/www/$(WIFI_HTML)
 	@scp app/$(STATUS_HTML) $(USER)@$(HOST):/www/$(STATUS_HTML)
 	@scp app/$(SERVICES_HTML) $(USER)@$(HOST):/www/$(SERVICES_HTML)
+	@scp app/$(SYSLOG_HTML) $(USER)@$(HOST):/www/$(SYSLOG_HTML)

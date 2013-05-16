@@ -23,6 +23,10 @@ angular.module('flmUiApp', ['ngCookies', 'ui.bootstrap'])
         templateUrl: 'views/services.html',
         controller: 'ServicesCtrl'
       })
+      .when('/syslog', {
+        templateUrl: 'views/syslog.html',
+        controller: 'SyslogCtrl'
+      })
       .otherwise({
         redirectTo: '/'
       });
