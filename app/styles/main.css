@@ -38,3 +38,8 @@ textarea#progressLog {
 span.label {
     float: right;
 }
+
+form[name="servicesForm"] .control-label {
+    padding-right: 20px;
+    width: 250px;
+}

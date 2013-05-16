@@ -1,0 +1,35 @@
+<div>
+    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+</div>
+
+<form name="servicesForm" class="form-horizontal" ng-submit="save()">
+    <div class="well well-large">
+        <div class="control-group">
+            <label for="wan" class="control-label">Send readings to the Flukso platform</label>
+            <div class="controls">
+                <input name="wan" type="checkbox" ng-model="daemon.enable_wan_branch" ng-false-value="0" ng-true-value="1">
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="lan" class="control-label">Enable local real-time readings</label>
+            <div class="controls">
+                <input name="lan" type="checkbox" ng-model="daemon.enable_lan_branch" ng-false-value="0" ng-true-value="1">
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="upgrade" class="control-label">Allow remote firmware upgrades</label>
+            <div class="controls">
+                <input name="upgrade" type="checkbox" ng-model="daemon.enable_remote_upgrade" ng-false-value="0" ng-true-value="1">
+            </div>
+        </div>
+    </div>
+    <div class="control-group">
+        <div class="controls">
+            <button type="submit" class="btn btn-primary" ng-disabled="servicesForm.$invalid">Save</button>
+        </div>
+    </div>
+</form>
+ 
+<div ng-show="debug">
+    <p>{{daemon}}</p>
+<div>

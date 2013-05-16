@@ -19,6 +19,10 @@ angular.module('flmUiApp', ['ngCookies', 'ui.bootstrap'])
         templateUrl: 'views/status.html',
         controller: 'StatusCtrl'
       })
+      .when('/services', {
+        templateUrl: 'views/services.html',
+        controller: 'ServicesCtrl'
+      })
       .otherwise({
         redirectTo: '/'
       });
