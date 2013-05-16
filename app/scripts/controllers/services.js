@@ -1,7 +1,7 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("ServicesCtrl", function($scope, $dialog, $http, flmRpc) {
+    .controller("ServicesCtrl", function($scope, $dialog, flmRpc) {
         $scope.debug = false;
         $scope.alerts = [];
         $scope.daemon = {};
@@ -71,8 +71,8 @@ angular.module("flmUiApp")
 });
 
 angular.module("flmUiApp")
-    .controller("ServicesSaveCtrl", ["$scope", "$http", "flmRpc", "dialog", "flukso",
-    function($scope, $http, flmRpc, dialog, flukso) {
+    .controller("ServicesSaveCtrl", ["$scope", "flmRpc", "dialog", "flukso",
+    function($scope, flmRpc, dialog, flukso) {
         $scope.flukso = flukso;
         $scope.closeDisabled = true;
         $scope.progress = 0;

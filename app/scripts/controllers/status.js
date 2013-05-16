@@ -1,7 +1,7 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("StatusCtrl", function($scope, $http, flmRpc) {
+    .controller("StatusCtrl", function($scope, flmRpc) {
         $scope.debug = false;
         $scope.alerts = [];
         $scope.system = {};

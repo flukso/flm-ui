@@ -1,7 +1,7 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("SensorCtrl", function($scope, $dialog, $http, flmRpc) {
+    .controller("SensorCtrl", function($scope, $dialog, flmRpc) {
         $scope.debug = false;
         $scope.alerts = [];
         $scope.noOfSensors = 5;
@@ -192,8 +192,8 @@ angular.module("flmUiApp")
 );
 
 angular.module("flmUiApp")
-    .controller("SensorSaveCtrl", ["$scope", "$http", "flmRpc", "dialog", "flukso",
-    function($scope, $http, flmRpc, dialog, flukso) {
+    .controller("SensorSaveCtrl", ["$scope", "flmRpc", "dialog", "flukso",
+    function($scope, flmRpc, dialog, flukso) {
         $scope.flukso = flukso;
         $scope.closeDisabled = true;
         $scope.progress = 0;
