@@ -5,31 +5,50 @@ angular.module('flmUiApp', ['ngCookies', 'ui.bootstrap'])
     $routeProvider
       .when('/', {
         templateUrl: 'views/main.html',
-        controller: 'MainCtrl'
+        controller: 'MainCtrl',
+        tagName: null
       })
       .when('/sensor', {
         templateUrl: 'views/sensor.html',
-        controller: 'SensorCtrl'
+        controller: 'SensorCtrl',
+        tagName: 'sensor'
       })
       .when('/wifi', {
         templateUrl: 'views/wifi.html',
-        controller: 'WifiCtrl'
+        controller: 'WifiCtrl',
+        tagName: 'wifi'
       })
       .when('/status', {
         templateUrl: 'views/status.html',
-        controller: 'StatusCtrl'
+        controller: 'StatusCtrl',
+        tagName: 'status'
       })
       .when('/services', {
         templateUrl: 'views/services.html',
-        controller: 'ServicesCtrl'
+        controller: 'ServicesCtrl',
+        tagName: 'services'
       })
       .when('/syslog', {
         templateUrl: 'views/syslog.html',
-        controller: 'SyslogCtrl'
+        controller: 'SyslogCtrl',
+        tagName: 'syslog'
       })
       .otherwise({
         redirectTo: '/'
       });
+  })
+  .run(function($rootScope, $route) {
+    $rootScope.$on("$routeChangeSuccess", function(ngEvent, currRoute, prevRoute) {
+      if (prevRoute && prevRoute.tagName) {
+        angular.element(document).find(prevRoute.tagName)
+          .parent().parent().removeClass("active");
+      }
+
+      if (currRoute && currRoute.tagName) {
+        angular.element(document).find(currRoute.tagName)
+          .parent().parent().addClass("active");
+      }
+    });
   });
 
 angular.module('flmUiApp')

@@ -14,13 +14,8 @@
     <link rel="stylesheet" href="styles/main.css">
   </head>
   <body ng-app="flmUiApp">
-    <!--[if lt IE 7]>
-      <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
-    <![endif]-->
-
     <!--[if lt IE 9]>
-      <script src="components/es5-shim/es5-shim.js"></script>
-      <script src="components/json3/lib/json3.min.js"></script>
+      <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a></p>
     <![endif]-->
 
     <!-- Add your site or application content here -->
@@ -30,9 +25,13 @@
           <a class="brand" href="/">
             <img alt="Flukso" src="/img/flukso.logo.png">
           </a>
-
-          <div class="nav-collapse">
-          </div>
+          <ul class="nav">
+            <li><a href="#/status"><status>status</status></a></li>
+            <li><a href="#/wifi"><wifi>wifi</wifi></a></li>
+            <li><a href="#/sensor"><sensor>sensor</sensor></a></li>
+            <li><a href="#/services"><services>services</services></a></li>
+            <li><a href="#/syslog"><syslog>syslog</syslog></a></li>
+          </ul>
         </div>
       </div>
     </div>
