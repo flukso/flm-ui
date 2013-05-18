@@ -8,11 +8,11 @@ MAIN_CSS=styles/main.css
 
 IMG=img/flukso.logo.png
 
-NG_JS=components/angular/angular.js
+NG_JS=components/angular/angular.min.js
 NG_RESOURCE_JS=components/angular-resource/angular-resource.js
 NG_COOKIES_JS=components/angular-cookies/angular-cookies.js
 NG_SANITIZE_JS=components/angular-sanitize/angular-sanitize.js
-NG_BOOTSTRAP_JS=components/angular-bootstrap/ui-bootstrap-tpls.js
+NG_BOOTSTRAP_JS=components/angular-bootstrap/ui-bootstrap-tpls.min.js
 
 APP_JS=scripts/app.js
 MAIN_JS=scripts/controllers/main.js
