@@ -17,7 +17,7 @@
 
 'use strict';
 
-angular.module('flmUiApp', ['ngCookies', 'ui.bootstrap'])
+angular.module('flmUiApp', ['ui.bootstrap'])
   .config(function ($routeProvider) {
     $routeProvider
       .when('/', {
