@@ -29,6 +29,10 @@ STATUS_HTML=views/status.html
 SERVICES_HTML=views/services.html
 SYSLOG_HTML=views/syslog.html
 
+info:
+	@echo "init:   initialize dir structure on target and transfer framework files"
+	@echo "upload: transfer the flm-ui specific files to the target"
+
 init:
 	@ssh $(USER)@$(HOST) mkdir -p \
 		/www/styles \
@@ -48,7 +52,7 @@ init:
 	@scp app/$(NG_SANITIZE_JS) $(USER)@$(HOST):/www/$(NG_SANITIZE_JS)
 	@scp app/$(NG_BOOTSTRAP_JS) $(USER)@$(HOST):/www/$(NG_BOOTSTRAP_JS)
 
-load:
+upload:
 	@scp app/$(INDEX) $(USER)@$(HOST):/www/$(INDEX)
 	@scp app/$(MAIN_CSS) $(USER)@$(HOST):/www/$(MAIN_CSS)
 	@scp app/$(APP_JS) $(USER)@$(HOST):/www/$(APP_JS)
