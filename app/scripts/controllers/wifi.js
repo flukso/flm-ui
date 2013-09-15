@@ -25,6 +25,7 @@ angular.module("flmUiApp")
         $scope.wireless = {};
         $scope.ssid = "";
         $scope.key = "";
+        $scope.ssidDisable = true;
 
         $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
@@ -42,15 +43,15 @@ angular.module("flmUiApp")
                 return true;
             }
 
-            return $scope.aps[$scope.ssid].Encryption == "none";
-        }
+            return $scope.aps[$scope.ssid].crypt == "none";
+        };
 
         $scope.pattern = function() {
             if (!$scope.aps[$scope.ssid]) {
                 return /.*/;
             }
 
-            switch ($scope.aps[$scope.ssid].Encryption) {
+            switch ($scope.aps[$scope.ssid].crypt) {
                 case "none":
                     return /.*/; /* don't care */
                 case "wep":
@@ -100,7 +101,7 @@ angular.module("flmUiApp")
                     }
 
                     /* sanitize the key entry */
-                    switch ($scope.aps[$scope.ssid].Encryption) {
+                    switch ($scope.aps[$scope.ssid].crypt) {
                         case "none":
                             $scope.key = "";
                             break;
@@ -115,7 +116,7 @@ angular.module("flmUiApp")
 
                     wireless[$scope.section] = {
                         ssid: $scope.ssid,
-                        encryption: wpa2psk($scope.aps[$scope.ssid].Encryption),
+                        encryption: wpa2psk($scope.aps[$scope.ssid].crypt),
                         key: $scope.key
                     };
 
@@ -138,7 +139,7 @@ angular.module("flmUiApp")
                     flmRpc.call("uci", "get_all", ["wireless"]).then(
                         function(wireless) {
                             angular.forEach(wireless, function(value, section) {
-                                if (section != "wifi0") {
+                                if (section != "radio0") {
                                     $scope.section = section;
                                 }
                             });
@@ -148,24 +149,21 @@ angular.module("flmUiApp")
                 });
         };
 
-        flmRpc.call("sys", "wifi.iwscan", []).then(
-            function(iwscan) {
-                angular.forEach(iwscan.ath0, function(ap, key) {
-                    $scope.aps[ap.ESSID] = ap;
+        flmRpc.call("sys", "wifi.iwinfo", ["wlan0", "scanlist"]).then(
+            function(iwinfo) {
+                $scope.ssidDisable = false;
 
-                    if (ap["Encryption key"] == "off") {
-                        $scope.aps[ap.ESSID].Encryption = "none";
-                    } else {
-                        if (!ap["Authentication Suites (1) "]) {
-                            $scope.aps[ap.ESSID].Encryption = "wep";
-                        } else {
-                            if ((ap["Pairwise Ciphers (2) "] && ap["Pairwise Ciphers (2) "].indexOf("CCMP") != -1)
-                             || (ap["Pairwise Ciphers (1) "] && ap["Pairwise Ciphers (1) "].indexOf("CCMP") != -1)) {
-                                $scope.aps[ap.ESSID].Encryption = "wpa2";
-                            } else {
-                                $scope.aps[ap.ESSID].Encryption = "wpa";
-                            }
-                        }
+                angular.forEach(iwinfo.scanlist, function(ap, key) {
+                    $scope.aps[ap.ssid] = ap;
+                    $scope.aps[ap.ssid].quality = ap.quality + "/" + ap.quality_max;
+
+                    $scope.aps[ap.ssid].crypt = ap.encryption.wep ? "wep" : "none";
+
+                    if (ap.encryption.wpa == 1) {
+                        $scope.aps[ap.ssid].crypt = "wpa";
+                    }
+                    else if (ap.encryption.wpa > 1) { /* WPA2 or mixed */
+                        $scope.aps[ap.ssid].crypt = "wpa2";
                     }
                 });
             },
@@ -177,18 +175,18 @@ angular.module("flmUiApp")
                 $scope.wireless = wireless;
 
                 angular.forEach(wireless, function(value, section) {
-                    if (section != "wifi0" && wireless[section].ssid != "zwaluw") {
+                    if (section != "radio0" && wireless[section].ssid != "zwaluw") {
                         /* add the ssid to the scan list if it's not present yet */
                         if (!$scope.aps[wireless[section].ssid]) {
                             $scope.aps[wireless[section].ssid] =
-                                {"ESSID": wireless[section].ssid};
+                                {"ssid": wireless[section].ssid};
 
                             if (wireless[section].encryption == "psk") {
-                                $scope.aps[wireless[section].ssid].Encryption = "wpa";
+                                $scope.aps[wireless[section].ssid].crypt = "wpa";
                             } else if (wireless[section].encryption == "psk2") {
-                                $scope.aps[wireless[section].ssid].Encryption = "wpa2";
+                                $scope.aps[wireless[section].ssid].crypt = "wpa2";
                             } else {
-                                $scope.aps[wireless[section].ssid].Encryption =
+                                $scope.aps[wireless[section].ssid].crypt =
                                     wireless[section].encryption;
                             }
                         }
@@ -197,7 +195,7 @@ angular.module("flmUiApp")
                         $scope.key = wireless[section].key;
                     }
 
-                    if (section != "wifi0") {
+                    if (section != "radio0") {
                         $scope.section = section;
                     }
                 });
@@ -234,31 +232,21 @@ angular.module("flmUiApp")
             function(result) {
                 $scope.progress += 25;
                 $scope.progressLog += "\nCommitting changes: " + result;
-                $scope.progressLog += "\nRe-initializing wifi stack: ";
             },
             function(error) {
                 $scope.progressLog += "\nCommitting changes: " + error;
-                $scope.progressLog += "\nRe-initializing wifi stack: ";
             }
         );
 
-        /* using a special error function here, so we cannot invoke flmRpc */
-        var url = "/cgi-bin/luci/rpc/sys?auth=" + $scope.sysauth;
-        var request = {
-            "method": "exec",
-            "params": ["/sbin/wifi up"],
-            "id": Date.now()
-        };
-
-        $http.post(url, request)
-            .success(function(response) {
+        flmRpc.call("sys", "exec", ["/sbin/wifi up"]).then(
+            function(result) {
                 $scope.progress += 50;
-                $scope.progressLog += "\n" + (response.result || response.error);
+                $scope.progressLog += "\nRe-initializing wifi stack";
                 $scope.closeDisabled = false;
-            })
-            .error(function(response) {
-                $scope.progress += 50;
-                $scope.progressLog += "\nHTTP error. Most likely due to an incorrect wifi key or an out-of-range access point."; 
+            },
+            function(error) { 
+                $scope.progressLog += "\nRe-initializing wifi stack: " + error;
                 $scope.closeDisabled = false;
-            });
+            }
+        );
     }]);

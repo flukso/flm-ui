@@ -26,7 +26,7 @@ angular.module("flmUiApp")
         $scope.uptime = "";
         $scope.defaultroute = {};
         $scope.mode = "";
-        $scope.iwconfig = {};
+        $scope.iwinfo = {};
         $scope.ssid = "";
         $scope.quality = "";
         $scope.ip = "";
@@ -86,21 +86,21 @@ angular.module("flmUiApp")
 
         flmRpc.call("uci", "get_all", ["network"]).then(
             function(network) {
-                $scope.mode = network.wan.ifname == "ath0" ? "wifi" : "ethernet";
+                $scope.mode = network.wan.ifname == "wlan0" ? "wifi" : "ethernet";
             },
             pushError
         );
 
-        flmRpc.call("sys", "wifi.getiwconfig", []).then(
-            function(iwconfig) {
-                $scope.iwconfig = iwconfig;
+        flmRpc.call("sys", "wifi.iwinfo", ["wlan0", "ssid", "quality", "quality_max"]).then(
+            function(iwinfo) {
+                $scope.iwinfo = iwinfo;
 
-                if (iwconfig.ath0) {
-                    $scope.ssid = iwconfig.ath0["ESSID"];
-                    $scope.quality = iwconfig.ath0["Access Point"] == "Not-Associated" ?
-                        "not associated" : iwconfig.ath0["Link Quality"];
+                if (iwinfo) {
+                    $scope.ssid = iwinfo.ssid || "";
+                    $scope.quality = iwinfo.quality ?
+                        iwinfo.quality + "/" + iwinfo.quality_max : "not associated";
 
-                    if (iwconfig.ath0["Access Point"] == "Not-Associated") {
+                    if (!iwinfo.quality) {
                         $scope.assocErr = true;
                     }
                 }

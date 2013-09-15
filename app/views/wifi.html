@@ -7,27 +7,27 @@
         <div class="control-group">
             <label for="ssid" class="control-label">SSID</label>
             <div class="controls">
-                <select name="ssid" ng-model="ssid" ng-required="true">
-                    <option ng-repeat="ap in aps">{{ap.ESSID}}</option>
+                <select name="ssid" ng-model="ssid" ng-required="true" ng-disabled="ssidDisable">
+                    <option ng-repeat="ap in aps">{{ap.ssid}}</option>
                 </select>
             </div>
         </div>
         <div class="control-group">
-            <label for="frequency" class="control-label">Frequency</label>
+            <label for="channel" class="control-label">Channel</label>
             <div class="controls">
-                <input name="frequency" type="text" ng-model="aps[ssid].Frequency" disabled>
+                <input name="channel" type="text" ng-model="aps[ssid].channel" disabled>
             </div>
         </div>
         <div class="control-group">
             <label for="quality" class="control-label">Signal Quality</label>
             <div class="controls">
-                <input name="quality" type="text" ng-model="aps[ssid].Quality" disabled>
+                <input name="quality" type="text" ng-model="aps[ssid].quality" disabled>
             </div>
         </div>
         <div class="control-group">
             <label for="encryption" class="control-label">Encryption</label>
             <div class="controls">
-                <input name="encryption" type="text" ng-model="aps[ssid].Encryption" disabled>
+                <input name="encryption" type="text" ng-model="aps[ssid].encryption.description" disabled>
             </div>
         </div>
         <div class="control-group">
