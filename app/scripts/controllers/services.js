@@ -40,7 +40,7 @@ angular.module("flmUiApp")
                 '<h2>Updating services configuration</h2>'+
                 '</div>'+
                 '<div class="modal-body">'+
-                '<div class="progress progress-striped active">' +
+                '<div class="progress progress-striped {{progressStatus}} active">' +
                 '<div class="bar" style="width: {{progress}}%;"></div>' +
                 '</div>' +
                 '<textarea id="progressLog" readonly="readonly">{{progressLog}}</textarea>'+
@@ -88,18 +88,21 @@ angular.module("flmUiApp")
 });
 
 angular.module("flmUiApp")
-    .controller("ServicesSaveCtrl", ["$scope", "flmRpc", "dialog", "flukso",
-    function($scope, flmRpc, dialog, flukso) {
+    .controller("ServicesSaveCtrl", ["$scope", "$q", "flmRpc", "dialog", "flukso",
+    function($scope, $q, flmRpc, dialog, flukso) {
         $scope.flukso = flukso;
         $scope.closeDisabled = true;
         $scope.progress = 0;
+        $scope.progressStatus = "progress-info";
         $scope.progressLog = "Saving service parameters: ";
         $scope.close = function(result) {
             dialog.close();
         }
 
+        var promiseUci = [];
+
         for (var section in flukso) {
-            flmRpc.call("uci", "tset", ["flukso", section, flukso[section]]).then(
+            var promise = flmRpc.call("uci", "tset", ["flukso", section, flukso[section]]).then(
                 function(result) {
                     $scope.progress += 30;
                     $scope.progressLog += result;
@@ -108,27 +111,40 @@ angular.module("flmUiApp")
                     $scope.progressLog += error;
                 }
             ); 
+
+            promiseUci.push(promise);
         }
 
-        flmRpc.call("uci", "commit", ["flukso"]).then(
-            function(result) {
-                $scope.progress += 30;
-                $scope.progressLog += "\nCommitting changes: " + result;
-            },
-            function(error) {
-                $scope.progressLog += "\nCommitting changes: " + error;
-            }
-        ); 
 
-        flmRpc.call("sys", "exec", ["/etc/init.d/flukso restart"]).then(
-            function(result) {
-                $scope.progress += 40;
-                $scope.progressLog += "\nRestarting the Flukso daemon: ok";
-                $scope.closeDisabled = false;
-            },
-            function(error) {
-                $scope.progressLog += "\nRestarting the Flukso daemon: " + error;
-                $scope.closeDisabled = false;
-            }
-        ); 
+        $q.all(promiseUci)
+        .always(function () {
+            flmRpc.call("uci", "commit", ["flukso"])
+            .then(
+                function(result) {
+                    $scope.progress += 30;
+                    $scope.progressLog += "\nCommitting changes: " + result;
+                },
+                function(error) {
+                    $scope.progressLog += "\nCommitting changes: " + error;
+                })
+            .always(function () {
+                flmRpc.call("sys", "exec", ["/etc/init.d/flukso restart"])
+                .then(
+                    function(result) {
+                        $scope.progress += 40;
+                        $scope.progressLog += "\nRestarting the Flukso daemon: ok";
+                    },
+                    function(error) {
+                        $scope.progressLog += "\nRestarting the Flukso daemon: " + error;
+                    })
+                .always(function() {
+                    $scope.closeDisabled = false;
+                    if ($scope.progress == 100) {
+                        $scope.progressStatus = "progress-success";
+                    } else {
+                        $scope.progressStatus = "progress-danger";
+                    };
+                })
+            })
+        }); 
     }]);

@@ -68,7 +68,7 @@ angular.module("flmUiApp")
                 '<h2>Updating wifi configuration</h2>'+
                 '</div>'+
                 '<div class="modal-body">'+
-                '<div class="progress progress-striped active">' +
+                '<div class="progress progress-striped {{progressStatus}} active">' +
                 '<div class="bar" style="width: {{progress}}%;"></div>' +
                 '</div>' +
                 '<textarea id="progressLog" readonly="readonly">{{progressLog}}</textarea>'+
@@ -206,18 +206,21 @@ angular.module("flmUiApp")
 );
 
 angular.module("flmUiApp")
-    .controller("WifiSaveCtrl", ["$scope", "$http", "flmRpc", "dialog", "wireless",
-    function($scope, $http, flmRpc, dialog, wireless) {
+    .controller("WifiSaveCtrl", ["$scope", "$q", "flmRpc", "dialog", "wireless",
+    function($scope, $q, flmRpc, dialog, wireless) {
         $scope.wireless = wireless;
         $scope.closeDisabled = true;
         $scope.progress = 0;
+        $scope.progressStatus = "progress-info";
         $scope.progressLog = "Saving wifi parameters: ";
         $scope.close = function(result) {
             dialog.close();
         }
 
+        var promiseUci = [];
+
         for (var section in wireless) {
-            flmRpc.call("uci", "tset", ["wireless", section, wireless[section]]).then(
+            var promise = flmRpc.call("uci", "tset", ["wireless", section, wireless[section]]).then(
                 function(result) {
                     $scope.progress += 25;
                     $scope.progressLog += result;
@@ -226,27 +229,39 @@ angular.module("flmUiApp")
                     $scope.progressLog += error;
                 }
             );
+
+            promiseUci.push(promise);
         }
 
-        flmRpc.call("uci", "commit", ["wireless"]).then(
-            function(result) {
-                $scope.progress += 25;
-                $scope.progressLog += "\nCommitting changes: " + result;
-            },
-            function(error) {
-                $scope.progressLog += "\nCommitting changes: " + error;
-            }
-        );
-
-        flmRpc.call("sys", "exec", ["/sbin/wifi up"]).then(
-            function(result) {
-                $scope.progress += 50;
-                $scope.progressLog += "\nRe-initializing wifi stack";
-                $scope.closeDisabled = false;
-            },
-            function(error) { 
-                $scope.progressLog += "\nRe-initializing wifi stack: " + error;
-                $scope.closeDisabled = false;
-            }
-        );
+        $q.all(promiseUci)
+        .always(function () {
+            flmRpc.call("uci", "commit", ["wireless"])
+            .then(
+                function(result) {
+                    $scope.progress += 25;
+                    $scope.progressLog += "\nCommitting changes: " + result;
+                },
+                function(error) {
+                    $scope.progressLog += "\nCommitting changes: " + error;
+                })
+            .always(function () {
+                flmRpc.call("sys", "exec", ["/sbin/wifi up"])
+                .then(
+                    function(result) {
+                        $scope.progress += 50;
+                        $scope.progressLog += "\nRe-initializing wifi stack";
+                    },
+                    function(error) { 
+                        $scope.progressLog += "\nRe-initializing wifi stack: " + error;
+                    })
+                .always(function() {
+                    $scope.closeDisabled = false;
+                    if ($scope.progress == 100) {
+                        $scope.progressStatus = "progress-success";
+                    } else {
+                        $scope.progressStatus = "progress-danger";
+                    };
+                }) 
+            })
+       });
     }]);

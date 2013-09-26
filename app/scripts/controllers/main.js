@@ -19,6 +19,7 @@
 
 angular.module("flmUiApp")
     .controller("MainCtrl", function ($rootScope, $scope, $http, $location) {
+        $rootScope.sysauth = "0123456789abcdef0123456789abcdef";
         $scope.user = "root";
         $scope.pass = "root";
         $scope.alerts = [];
