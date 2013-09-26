@@ -89,9 +89,15 @@ angular.module('flmUiApp')
               deferred.resolve(response.result);
             }
           })
-          .error(function(response) {
-            /* an invalid auth seems to trigger a 500 */
-            $location.path("/");
+          .error(function(response, status) {
+            switch (status) {
+            case 403:
+                deferred.reject("Invalid session. Please log in.");
+                break;
+            case 500:
+                deferred.reject(response);
+                break;
+            }
           });
 
         return deferred.promise;
