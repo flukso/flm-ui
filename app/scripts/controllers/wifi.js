@@ -149,7 +149,8 @@ angular.module("flmUiApp")
                 });
         };
 
-        flmRpc.call("sys", "wifi.iwinfo", ["wlan0", "scanlist"]).then(
+        flmRpc.call("sys", "wifi.iwinfo", ["wlan0", "scanlist"])
+        .then(
             function(iwinfo) {
                 $scope.ssidDisable = false;
 
@@ -167,41 +168,41 @@ angular.module("flmUiApp")
                     }
                 });
             },
-            pushError
-        );
+            pushError)
+        .always(function() {
+            flmRpc.call("uci", "get_all", ["wireless"])
+            .then(
+                function(wireless) {
+                    $scope.wireless = wireless;
 
-        flmRpc.call("uci", "get_all", ["wireless"]).then(
-            function(wireless) {
-                $scope.wireless = wireless;
+                    angular.forEach(wireless, function(value, section) {
+                        if (section != "radio0" && wireless[section].ssid != "zwaluw") {
+                            /* add the ssid to the scan list if it's not present yet */
+                            if (!$scope.aps[wireless[section].ssid]) {
+                                $scope.aps[wireless[section].ssid] =
+                                    {"ssid": wireless[section].ssid};
 
-                angular.forEach(wireless, function(value, section) {
-                    if (section != "radio0" && wireless[section].ssid != "zwaluw") {
-                        /* add the ssid to the scan list if it's not present yet */
-                        if (!$scope.aps[wireless[section].ssid]) {
-                            $scope.aps[wireless[section].ssid] =
-                                {"ssid": wireless[section].ssid};
-
-                            if (wireless[section].encryption == "psk") {
-                                $scope.aps[wireless[section].ssid].crypt = "wpa";
-                            } else if (wireless[section].encryption == "psk2") {
-                                $scope.aps[wireless[section].ssid].crypt = "wpa2";
-                            } else {
-                                $scope.aps[wireless[section].ssid].crypt =
-                                    wireless[section].encryption;
+                                if (wireless[section].encryption == "psk") {
+                                    $scope.aps[wireless[section].ssid].crypt = "wpa";
+                                } else if (wireless[section].encryption == "psk2") {
+                                    $scope.aps[wireless[section].ssid].crypt = "wpa2";
+                                } else {
+                                    $scope.aps[wireless[section].ssid].crypt =
+                                        wireless[section].encryption;
+                                }
                             }
+
+                            $scope.ssid = wireless[section].ssid;
+                            $scope.key = wireless[section].key;
                         }
 
-                        $scope.ssid = wireless[section].ssid;
-                        $scope.key = wireless[section].key;
-                    }
-
-                    if (section != "radio0") {
-                        $scope.section = section;
-                    }
-                });
-            },
-            pushError
-        );
+                        if (section != "radio0") {
+                            $scope.section = section;
+                        }
+                    });
+                },
+                pushError)
+            });
     }
 );
 
