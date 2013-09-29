@@ -38,12 +38,85 @@ angular.module("flmUiApp")
             });
         };
 
+        /*
+        owrt-encryption     enabled     wep     wpa     pair_ciphers
+        none                false       false   0       []
+        wep                 true        true    0       []
+        psk                 true        false   1       ["TKIP"]
+        psk+ccmp            true        false   1       ["CCMP"]
+        psk+tkip+ccmp       true        false   1       ["TKIP","CCMP"]
+        psk2+tkip           true        false   2       ["TKIP"]
+        psk2                true        false   2       ["CCMP"]
+        psk2+tkip+ccmp      true        false   2       ["TKIP","CCMP"]
+        psk-mixed+tkip      true        false   3       ["TKIP"]
+        psk-mixed+ccmp      true        false   3       ["CCMP"]
+        psk-mixed           true        false   3       ["TKIP","CCMP"]
+        */
+
+        function scan2encrypt(ap) {
+            if (!ap.encryption.enabled)
+                return "none";
+            if (ap.encryption.wep)
+                return "wep";
+
+            function stringCipher(arrCipher) {
+                return arrCipher.toString().toLowerCase().replace(/,/g, "+");
+            }
+
+            var encr;
+
+            switch (ap.encryption.wpa) {
+            case 1:
+                encr = "psk+" + stringCipher(ap.encryption.pair_ciphers);
+                break;
+            case 2:
+                encr = "psk2+" + stringCipher(ap.encryption.pair_ciphers);
+                break;
+            case 3:
+                encr = "psk-mixed+" + stringCipher(ap.encryption.pair_ciphers);
+                break;
+            }
+
+            switch (encr) {
+            case "psk+tkip":
+                encr = "psk";
+                break;
+            case "psk2+ccmp":
+                encr = "psk2";
+                break;
+            case "psk-mixed+tkip+ccmp":
+                encr = "psk-mixed";
+                break;            
+            }
+
+            return encr;
+        }
+
+        function uciEncr2descr(encr) {
+            var descr =
+            {
+                "none": "None",
+                "wep" : "WEP Open/Shared (NONE)",
+                "psk" : "WPA PSK (TKIP)",
+                "psk+ccmp" : "WPA PSK (CCMP)",
+                "psk+tkip+ccmp" : "WPA PSK (TKIP, CCMP)",
+                "psk2" : "WPA2 PSK (CCMP)",
+                "psk2+tkip" : "WPA2 PSK (TKIP)",
+                "psk2+tkip+ccmp": "WPA2 PSK (TKIP, CCMP)",
+                "psk-mixed": "mixed WPA/WPA2 PSK (TKIP, CCMP)",
+                "psk-mixed+tkip": "mixed WPA/WPA2 PSK (TKIP)",
+                "psk-mixed+ccmp": "mixed WPA/WPA2 PSK (CCMP)",
+            };
+
+            return descr[encr];
+        }
+
         $scope.disable = function() {
             if (!$scope.aps[$scope.ssid]) {
                 return true;
             }
 
-            return $scope.aps[$scope.ssid].crypt == "none";
+            return $scope.aps[$scope.ssid].uciEncr == "none";
         };
 
         $scope.pattern = function() {
@@ -51,14 +124,13 @@ angular.module("flmUiApp")
                 return /.*/;
             }
 
-            switch ($scope.aps[$scope.ssid].crypt) {
-                case "none":
-                    return /.*/; /* don't care */
-                case "wep":
-                    return /(^.{5}$)|(^.{13}$)|(^[a-fA-F0-9]{10}$)|(^[a-fA-F0-9]{26}$)/;
-                case "wpa":
-                case "wpa2":
-                    return /^.{8,63}$/;
+            switch ($scope.aps[$scope.ssid].uciEncr) {
+            case "none":
+                return /.*/; /* don't care */
+            case "wep":
+                return /(^.{5}$)|(^.{13}$)|(^[a-fA-F0-9]{10}$)|(^[a-fA-F0-9]{26}$)/;
+            default:
+                return /^.{8,63}$/;
             }
         };
 
@@ -90,18 +162,8 @@ angular.module("flmUiApp")
                         return hexstr;
                     }
 
-                    function wpa2psk(encr) {
-                        switch (encr) {
-                            case "wpa":
-                                return "psk";
-                            case "wpa2":
-                                return "psk2";
-                        }
-                        return encr;
-                    }
-
                     /* sanitize the key entry */
-                    switch ($scope.aps[$scope.ssid].crypt) {
+                    switch ($scope.aps[$scope.ssid].uciEncr) {
                         case "none":
                             $scope.key = "";
                             break;
@@ -116,7 +178,7 @@ angular.module("flmUiApp")
 
                     wireless[$scope.section] = {
                         ssid: $scope.ssid,
-                        encryption: wpa2psk($scope.aps[$scope.ssid].crypt),
+                        encryption: $scope.aps[$scope.ssid].uciEncr,
                         key: $scope.key
                     };
 
@@ -140,6 +202,8 @@ angular.module("flmUiApp")
                         function(wireless) {
                             angular.forEach(wireless, function(value, section) {
                                 if (section != "radio0") {
+                                    /* the anonymous wifi-iface section
+                                       will have a new section id */
                                     $scope.section = section;
                                 }
                             });
@@ -157,15 +221,7 @@ angular.module("flmUiApp")
                 angular.forEach(iwinfo.scanlist, function(ap, key) {
                     $scope.aps[ap.ssid] = ap;
                     $scope.aps[ap.ssid].quality = ap.quality + "/" + ap.quality_max;
-
-                    $scope.aps[ap.ssid].crypt = ap.encryption.wep ? "wep" : "none";
-
-                    if (ap.encryption.wpa == 1) {
-                        $scope.aps[ap.ssid].crypt = "wpa";
-                    }
-                    else if (ap.encryption.wpa > 1) { /* WPA2 or mixed */
-                        $scope.aps[ap.ssid].crypt = "wpa2";
-                    }
+                    $scope.aps[ap.ssid].uciEncr = scan2encrypt(ap);
                 });
             },
             pushError)
@@ -177,19 +233,19 @@ angular.module("flmUiApp")
 
                     angular.forEach(wireless, function(value, section) {
                         if (section != "radio0" && wireless[section].ssid != "zwaluw") {
-                            /* add the ssid to the scan list if it's not present yet */
+                            /* add the stored ssid to the scan list if it's not present yet */
                             if (!$scope.aps[wireless[section].ssid]) {
                                 $scope.aps[wireless[section].ssid] =
-                                    {"ssid": wireless[section].ssid};
-
-                                if (wireless[section].encryption == "psk") {
-                                    $scope.aps[wireless[section].ssid].crypt = "wpa";
-                                } else if (wireless[section].encryption == "psk2") {
-                                    $scope.aps[wireless[section].ssid].crypt = "wpa2";
-                                } else {
-                                    $scope.aps[wireless[section].ssid].crypt =
-                                        wireless[section].encryption;
-                                }
+                                {
+                                    "ssid": wireless[section].ssid,
+                                    "channel": "-",
+                                    "quality": "-",
+                                    "uciEncr": wireless[section].encryption,
+                                    "encryption":
+                                    {
+                                        "description": uciEncr2descr(wireless[section].encryption)
+                                    }
+                                };
                             }
 
                             $scope.ssid = wireless[section].ssid;
@@ -202,9 +258,8 @@ angular.module("flmUiApp")
                     });
                 },
                 pushError)
-            });
-    }
-);
+        });
+    });
 
 angular.module("flmUiApp")
     .controller("WifiSaveCtrl", ["$scope", "$q", "flmRpc", "dialog", "wireless",
