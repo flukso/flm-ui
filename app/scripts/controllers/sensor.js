@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013 Bart Van Der Meerssche <bart@flukso.net>
+ * Copyright (c) 2015 Bart Van Der Meerssche <bart@flukso.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("SensorCtrl", function($scope, $dialog, flmRpc) {
+    .controller("SensorCtrl", function($rootScope, $scope, $dialog, flmRpc) {
         $scope.debug = false;
         $scope.alerts = [];
         $scope.noOfSensors = 5;
@@ -50,7 +50,10 @@ angular.module("flmUiApp")
                 case "phase":
                     disable = $scope.sensors.main.max_analog_sensors == "1";
                     break;
-                 case "enable":
+                case "dsmr":
+                    disable = $rootScope.model == "FLM02A";
+                    break;
+                case "enable":
                     disable = sensor.port.length == 0;
                     break;
                 case "voltage":
@@ -146,8 +149,8 @@ angular.module("flmUiApp")
 
                     flukso.main = {
                         max_analog_sensors: $scope.sensors.main.max_analog_sensors,
-                        phase: $scope.sensors.main.phase
-
+                        phase: $scope.sensors.main.phase,
+                        dsmr: $scope.sensors.main.dsmr
                     };
 
                     for (var i=1; i<6; i++) {

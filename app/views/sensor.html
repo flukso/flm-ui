@@ -21,6 +21,15 @@
                 </select>
             </div>
         </div>
+        <div class="control-group">
+            <label for="dsmr" class="control-label">DSMR version</label>
+            <div class="controls">
+                <select name="dsmr" ng-model="sensors.main.dsmr" ng-disabled="disable('dsmr')">
+                    <option>2.2</option>
+                    <option>4.0</option>
+                </select>
+            </div>
+        </div>
     </div>
     <div class="well well-large">
         <div class="control-group">

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013 Bart Van Der Meerssche <bart@flukso.net>
+ * Copyright (c) 2015 Bart Van Der Meerssche <bart@flukso.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("StatusCtrl", function($scope, flmRpc) {
+    .controller("StatusCtrl", function($rootScope, $scope, flmRpc) {
         $scope.debug = false;
         $scope.alerts = [];
         $scope.system = {};
@@ -57,6 +57,7 @@ angular.module("flmUiApp")
                 angular.forEach(system, function(value, section) {
                     if (value[".type"] == "system") {
                         $scope.system = value;
+                        $rootScope.model = value["model"]
                     }
                 });
             },
