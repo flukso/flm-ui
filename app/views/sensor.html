@@ -30,6 +30,16 @@
                 </select>
             </div>
         </div>
+        <div class="control-group">
+            <label for="led" class="control-label">LED mode</label>
+            <div class="controls">
+                <select name="led" ng-model="sensors.main.led_mode" ng-disabled="disable('led')">
+                    <option>heartbeat</option>
+                    <option>port 4</option>
+                    <option>port 5</option>
+                </select>
+            </div>
+        </div>
     </div>
     <div class="well well-large">
         <div class="control-group">

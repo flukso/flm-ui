@@ -51,6 +51,7 @@ angular.module("flmUiApp")
                     disable = $scope.sensors.main.max_analog_sensors == "1";
                     break;
                 case "dsmr":
+                case "led":
                     disable = $rootScope.model == "FLM02A";
                     break;
                 case "enable":
@@ -153,6 +154,18 @@ angular.module("flmUiApp")
                         dsmr: $scope.sensors.main.dsmr
                     };
 
+                    switch ($scope.sensors.main.led_mode) {
+                        case "port 4":
+                            flukso.main.led_mode = "4";
+                            break;
+                        case "port 5":
+                            flukso.main.led_mode = "5";
+                            break;
+                        case "heartbeat":
+                            flukso.main.led_mode = "256";
+                            break;
+                    }
+
                     for (var i=1; i<6; i++) {
                         flukso[i.toString()] = {
                             enable: $scope.sensors[i].enable,
@@ -200,6 +213,17 @@ angular.module("flmUiApp")
             function(flukso) {
                 $scope.sensors = {};
                 $scope.sensors.main = flukso.main;
+                switch (flukso.main.led_mode) {
+                    case "4":
+                        $scope.sensors.main.led_mode = "port 4";
+                        break;
+                    case "5":
+                        $scope.sensors.main.led_mode = "port 5";
+                        break;
+                    case "256":
+                        $scope.sensors.main.led_mode = "heartbeat";
+                        break;
+                }
                 $scope.sensors.daemon = flukso.daemon;
 
                 for (var i=1; i<6; i++) {
