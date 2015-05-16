@@ -13,6 +13,7 @@ NG_RESOURCE_JS=components/angular-resource/angular-resource.js
 NG_COOKIES_JS=components/angular-cookies/angular-cookies.js
 NG_SANITIZE_JS=components/angular-sanitize/angular-sanitize.js
 NG_BOOTSTRAP_JS=components/angular-bootstrap/ui-bootstrap-tpls.min.js
+MQTTWS_JS=components/mqttws/mqttws31-min.js
 
 APP_JS=scripts
 APP_HTML=views
@@ -31,7 +32,8 @@ init:
 		/www/components/angular-resource \
 		/www/components/angular-cookies \
 		/www/components/angular-sanitize \
-		/www/components/angular-bootstrap
+		/www/components/angular-bootstrap \
+		/www/components/mqttws
 	@scp app/$(BOOTSTRAP_CSS) $(USER)@$(HOST):/www/$(BOOTSTRAP_CSS)
 	@scp app/$(IMG) $(USER)@$(HOST):/www/$(IMG)
 	@scp app/$(NG_JS) $(USER)@$(HOST):/www/$(NG_JS)
@@ -39,6 +41,7 @@ init:
 	@scp app/$(NG_COOKIES_JS) $(USER)@$(HOST):/www/$(NG_COOKIES_JS)
 	@scp app/$(NG_SANITIZE_JS) $(USER)@$(HOST):/www/$(NG_SANITIZE_JS)
 	@scp app/$(NG_BOOTSTRAP_JS) $(USER)@$(HOST):/www/$(NG_BOOTSTRAP_JS)
+	@scp app/$(MQTTWS_JS) $(USER)@$(HOST):/www/$(MQTTWS_JS)
 
 upload:
 	@scp app/$(INDEX) $(USER)@$(HOST):/www/$(INDEX)
