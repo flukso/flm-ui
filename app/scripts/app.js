@@ -50,6 +50,11 @@ angular.module('flmUiApp', ['ui.bootstrap'])
         controller: 'SyslogCtrl',
         tagName: 'syslog'
       })
+      .when('/mqtt', {
+        templateUrl: 'views/mqtt.html',
+        controller: 'MqttCtrl',
+        tagName: 'mqtt'
+      })
       .otherwise({
         redirectTo: '/'
       });
