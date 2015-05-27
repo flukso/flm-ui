@@ -17,7 +17,10 @@
 
 'use strict';
 
-angular.module('flmUiApp', ['ui.bootstrap'])
+angular.module('flmUiApp', [
+    'ngRoute',
+    'ui.bootstrap'
+  ])
   .config(function ($routeProvider) {
     $routeProvider
       .when('/', {

@@ -18,7 +18,7 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("WifiCtrl", function($scope, $dialog, flmRpc) {
+    .controller("WifiCtrl", function($scope, $modal, flmRpc) {
         $scope.debug = false;
         $scope.alerts = [];
         $scope.aps = {};
@@ -119,20 +119,31 @@ angular.module("flmUiApp")
             return $scope.aps[$scope.ssid].uciEncr == "none";
         };
 
-        $scope.pattern = function() {
-            if (!$scope.aps[$scope.ssid]) {
-                return /.*/;
-            }
+        /* duck typing in action
+           see:  http://stackoverflow.com/questions/18900308/angularjs-dynamic-ng-pattern-validation */
+        $scope.pattern = (function() {
+            var regex = {
+                "wep": /(^.{5}$)|(^.{13}$)|(^[a-fA-F0-9]{10}$)|(^[a-fA-F0-9]{26}$)/,
+                "wpa": /^.{8,63}$/
+            };
 
-            switch ($scope.aps[$scope.ssid].uciEncr) {
-            case "none":
-                return /.*/; /* don't care */
-            case "wep":
-                return /(^.{5}$)|(^.{13}$)|(^[a-fA-F0-9]{10}$)|(^[a-fA-F0-9]{26}$)/;
-            default:
-                return /^.{8,63}$/;
-            }
-        };
+            return {
+                test: function(value) { 
+                    if (!$scope.aps[$scope.ssid]) {
+                        return true;
+                    }
+
+                    switch ($scope.aps[$scope.ssid].uciEncr) {
+                    case "none":
+                        return true;
+                    case "wep":
+                        return regex.wep.test(value);
+                    default:
+                        return regex.wpa.test(value);
+                    }
+                }
+            };
+        })();
 
         $scope.save = function() {
             var tpl =
@@ -196,7 +207,7 @@ angular.module("flmUiApp")
 
             };
 
-            $dialog.dialog(opts).open()
+            $modal.open(opts).result
                 .then(function() {
                     flmRpc.call("uci", "get_all", ["wireless"]).then(
                         function(wireless) {
@@ -225,7 +236,7 @@ angular.module("flmUiApp")
                 });
             },
             pushError)
-        .always(function() {
+        .finally(function() {
             flmRpc.call("uci", "get_all", ["wireless"])
             .then(
                 function(wireless) {
@@ -262,15 +273,15 @@ angular.module("flmUiApp")
     });
 
 angular.module("flmUiApp")
-    .controller("WifiSaveCtrl", ["$scope", "$q", "flmRpc", "dialog", "wireless",
-    function($scope, $q, flmRpc, dialog, wireless) {
+    .controller("WifiSaveCtrl", ["$scope", "$q", "flmRpc", "$modalInstance", "wireless",
+    function($scope, $q, flmRpc, $modalInstance, wireless) {
         $scope.wireless = wireless;
         $scope.closeDisabled = true;
         $scope.progress = 0;
         $scope.progressStatus = "progress-info";
         $scope.progressLog = "Saving wifi parameters: ";
         $scope.close = function(result) {
-            dialog.close();
+            $modalInstance.close();
         }
 
         var promiseUci = [];
@@ -290,7 +301,7 @@ angular.module("flmUiApp")
         }
 
         $q.all(promiseUci)
-        .always(function () {
+        .finally(function () {
             flmRpc.call("uci", "commit", ["wireless"])
             .then(
                 function(result) {
@@ -300,7 +311,7 @@ angular.module("flmUiApp")
                 function(error) {
                     $scope.progressLog += "\nCommitting changes: " + error;
                 })
-            .always(function () {
+            .finally(function () {
                 flmRpc.call("sys", "exec", ["/sbin/wifi up"])
                 .then(
                     function(result) {
@@ -310,7 +321,7 @@ angular.module("flmUiApp")
                     function(error) { 
                         $scope.progressLog += "\nRe-initializing wifi stack: " + error;
                     })
-                .always(function() {
+                .finally(function() {
                     $scope.closeDisabled = false;
                     if ($scope.progress == 100) {
                         $scope.progressStatus = "progress-success";

@@ -1,15 +1,19 @@
 {
-  "author": {
-    "name": "https://github.com/angular-ui/bootstrap/graphs/contributors"
-  },
-  "name": "angular-bootstrap",
-  "version": "0.2.0",
-  "gitHead": "d88dfef402398ed83fbd63799db59c08fed8fb3b",
-  "_id": "angular-bootstrap@0.2.0",
-  "readme": "ERROR: No README.md file found!",
-  "description": "ERROR: No README.md file found!",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/angular-ui/bootstrap-bower.git"
-  }
+    "author": {
+        "name": "https://github.com/angular-ui/bootstrap/graphs/contributors"
+    },
+    "name": "angular-bootstrap",
+    "keywords": [
+        "angular",
+        "angular-ui",
+        "bootstrap"
+    ],
+    "license": "MIT",
+    "ignore": [],
+    "description": "Native AngularJS (Angular) directives for Bootstrap.",
+    "version": "0.13.0",
+    "main": ["./ui-bootstrap-tpls.js"],
+    "dependencies": {
+        "angular": ">=1.3.0"
+    }
 }

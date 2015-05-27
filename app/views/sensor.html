@@ -1,5 +1,5 @@
 <div>
-    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+    <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
 </div>
 <form name="sensorForm" class="form-horizontal" ng-submit="save()">
     <div class="well well-large">
@@ -45,13 +45,13 @@
         <div class="control-group">
             <label for="sensor" class="control-label"><strong>Sensor</strong></label>
             <div class="controls">
-                <strong><pagination num-pages="noOfSensors" current-page="i" class="sensor pagination-large" previous-text="&laquo;" next-text="&raquo;"></pagination></strong>
+                <strong><pagination total-items="noOfSensors" items-per-page="1" ng-model="i" class="sensor" previous-text="&laquo;" next-text="&raquo;"></pagination></strong>
             </div>
         </div>
         <div class="control-group">
             <label for="enable" class="control-label">Enable</label>
             <div class="controls">
-                <input name="enable" type="checkbox" ng-true-value="1" ng-false-value="0" ng-model="sensors[i].enable" ng-disabled="disable('enable')">
+                <input name="enable" type="checkbox" ng-true-value="'1'" ng-false-value="'0'" ng-model="sensors[i].enable" ng-disabled="disable('enable')">
             </div>
         </div>
         <div class="control-group">
@@ -79,7 +79,7 @@
         <div class="control-group">
             <label for="name" class="control-label">Name</label>
             <div class="controls">
-                <input name="name" type="text" ng-model="sensors[i].function" ng-pattern="pattern('name')" ng-disabled="disable('name')" ng-required="!disable('name')">
+                <input name="name" type="text" ng-model="sensors[i].function" ng-pattern="patternName" ng-disabled="disable('name')" ng-required="!disable('name')">
                 <span class="help-inline error" ng-show="sensorForm.name.$error.required">Required field.</span>
                 <span class="help-inline error" ng-show="sensorForm.name.$error.pattern">Wrong format. Only use alphanumeric, space, underscore and hyphen characters.</span>
             </div>
@@ -87,7 +87,7 @@
         <div class="control-group">
             <label for="voltage" class="control-label">Voltage</label>
             <div class="controls">
-                <input name="voltage" type="text" ng-model="sensors[i].voltage" ng-pattern="pattern('voltage')" ng-disabled="disable('voltage')" ng-required="!disable('voltage')">
+                <input name="voltage" type="text" ng-model="sensors[i].voltage" ng-pattern="patternVoltage" ng-disabled="disable('voltage')" ng-required="!disable('voltage')">
                 <span class="help-inline error" ng-show="sensorForm.voltage.$error.required">Required field.</span>
                 <span class="help-inline error" ng-show="sensorForm.voltage.$error.pattern">Wrong format. Only integer values allowed.</span>
             </div>
@@ -106,7 +106,7 @@
         <div class="control-group">
             <label for="constant" class="control-label">Constant</label>
             <div class="controls">
-                <input name="constant" type="text" ng-model="sensors[i].constant" ng-pattern="pattern('constant')" ng-disabled="disable('constant')" ng-required="!disable('constant')">
+                <input name="constant" type="text" ng-model="sensors[i].constant" ng-pattern="patternConstant" ng-disabled="disable('constant')" ng-required="!disable('constant')">
                 <span class="help-inline error" ng-show="sensorForm.constant.$error.required">Required field.</span>
                 <span class="help-inline error" ng-show="sensorForm.constant.$error.pattern">Wrong number format.<ul><li>Meter constants for electricity are expressed in Wh/pulse.</li><li>Meter constants for water and gas are entered in L/pulse.</li><li>Meter constants can range from 0.001 to 65535.999.</li><li>Decimal values should use a dot, not a comma.</li></ul></span>
             </div>

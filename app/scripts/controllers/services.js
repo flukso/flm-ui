@@ -18,7 +18,7 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("ServicesCtrl", function($scope, $dialog, flmRpc) {
+    .controller("ServicesCtrl", function($scope, $modal, flmRpc) {
         $scope.debug = false;
         $scope.alerts = [];
         $scope.daemon = {};
@@ -74,7 +74,7 @@ angular.module("flmUiApp")
 
             };
 
-            $dialog.dialog(opts).open()
+            $modal.open(opts).result
                 .then(function() {
                 });
         };
@@ -88,15 +88,15 @@ angular.module("flmUiApp")
 });
 
 angular.module("flmUiApp")
-    .controller("ServicesSaveCtrl", ["$scope", "$q", "flmRpc", "dialog", "flukso",
-    function($scope, $q, flmRpc, dialog, flukso) {
+    .controller("ServicesSaveCtrl", ["$scope", "$q", "flmRpc", "$modalInstance", "flukso",
+    function($scope, $q, flmRpc, $modalInstance, flukso) {
         $scope.flukso = flukso;
         $scope.closeDisabled = true;
         $scope.progress = 0;
         $scope.progressStatus = "progress-info";
         $scope.progressLog = "Saving service parameters: ";
         $scope.close = function(result) {
-            dialog.close();
+            $modalInstance.close();
         }
 
         var promiseUci = [];
@@ -117,7 +117,7 @@ angular.module("flmUiApp")
 
 
         $q.all(promiseUci)
-        .always(function () {
+        .finally(function () {
             flmRpc.call("uci", "commit", ["flukso"])
             .then(
                 function(result) {
@@ -127,7 +127,7 @@ angular.module("flmUiApp")
                 function(error) {
                     $scope.progressLog += "\nCommitting changes: " + error;
                 })
-            .always(function () {
+            .finally(function () {
                 flmRpc.call("sys", "exec", ["/etc/init.d/flukso restart"])
                 .then(
                     function(result) {
@@ -137,7 +137,7 @@ angular.module("flmUiApp")
                     function(error) {
                         $scope.progressLog += "\nRestarting the Flukso daemon: " + error;
                     })
-                .always(function() {
+                .finally(function() {
                     $scope.closeDisabled = false;
                     if ($scope.progress == 100) {
                         $scope.progressStatus = "progress-success";
