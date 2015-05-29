@@ -19,7 +19,10 @@
 
 angular.module('flmUiApp', [
     'ngRoute',
-    'ui.bootstrap'
+    'ui.bootstrap',
+    'ui.grid',
+    'ui.grid.edit',
+    'ui.grid.rowEdit'
   ])
   .config(function ($routeProvider) {
     $routeProvider
@@ -32,6 +35,11 @@ angular.module('flmUiApp', [
         templateUrl: 'views/sensor.html',
         controller: 'SensorCtrl',
         tagName: 'sensor'
+      })
+      .when('/kube', {
+        templateUrl: 'views/kube.html',
+        controller: 'KubeCtrl',
+        tagName: 'kube'
       })
       .when('/wifi', {
         templateUrl: 'views/wifi.html',
