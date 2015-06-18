@@ -1,0 +1,22 @@
+<div>
+    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+</div>
+
+<div class="page-header">
+    <h1>FluksoGraph</h1>
+</div>
+<div class="container-fluid">
+    <div class="accordion-group">
+        <div class="accordion-inner" id="graphpanel">
+            <div id="graph"></div>
+        </div>
+    </div>
+    <div class="accordion-group">
+        <div class="accordion-inner" id="choices"></div>
+    </div>
+</div>
+<div align="center">
+    <small>
+        <p>FLM <a href="http://github.com/gebhardm/flmlocal">Graph Display</a> &copy; 2014</p>
+    </small>
+</div>

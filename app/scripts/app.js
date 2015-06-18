@@ -66,6 +66,26 @@ angular.module('flmUiApp', [
         controller: 'MqttCtrl',
         tagName: 'mqtt'
       })
+      .when('/chart', {
+        templateUrl: 'views/chart.html',
+        controller: 'ChartCtrl',
+        tagName: 'chart'
+      })
+      .when('/gauge', {
+        templateUrl: 'views/gauge.html',
+        controller: 'GaugeCtrl',
+        tagName: 'gauge'
+      })
+      .when('/graph', {
+        templateUrl: 'views/graph.html',
+        controller: 'GraphCtrl',
+        tagName: 'graph'
+      })
+      .when('/panel', {
+        templateUrl: 'views/panel.html',
+        controller: 'PanelCtrl',
+        tagName: 'panel'
+      })	  
       .otherwise({
         redirectTo: '/'
       });

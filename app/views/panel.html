@@ -1,0 +1,40 @@
+<div>
+    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
+</div>
+
+<div class="page-header">
+    <h1>FluksoPanel</h1>
+</div>
+<div class="container-fluid">
+    <div class="accordion-group">
+        <div class="accordion-inner">
+            <table id="panel" class="table table-striped">
+                <tr ng-repeat="sensor in sensors">
+                    <td width="30%" style="vertical-align:middle;">
+                        <h4>{{sensor.name}}</h4>
+                        <small>{{sensor.gaugetimestamp}}</small>
+                    </td>
+                    <td style="vertical-align:middle;">
+                        <div id="sparkline{{sensor.id}}"></div>
+                    </td>
+                    <td width="30%" style="vertical-align:middle;">
+                        <h4>{{sensor.gaugevalue}} {{sensor.gaugeunit}}</h4>
+                        <small>Total {{sensor.countervalue}} {{sensor.counterunit}}</small>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="accordion-group">
+        <div class="accordion-inner">
+            <small>
+                <b>Latest MQTT message: </b>{{message}}
+            </small>
+        </div>
+    </div>
+</div>
+<div align="center">
+    <small>
+        <p>FLM <a href="http://github.com/gebhardm/flmlocal">Panel Display</a> &copy; 2014</p>
+    </small>
+</div>
