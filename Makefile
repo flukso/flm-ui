@@ -15,6 +15,9 @@ NG_ROUTE_JS=components/angular-route/angular-route.min.js
 NG_BOOTSTRAP_JS=components/angular-bootstrap/ui-bootstrap-tpls.min.js
 NG_UI_GRID_JS=components/angular-ui-grid/ui-grid.min.js
 MQTTWS_JS=components/mqttws/mqttws31-min.js
+JQUERY_JS=components/jquery
+GZIP_JS=components/gzip/gunzip.min.js
+RAPHAEL_JS=components/raphael
 
 APP_JS=scripts
 APP_HTML=views
@@ -33,7 +36,10 @@ init:
 		/www/components/angular-route \
 		/www/components/angular-bootstrap \
 		/www/components/angular-ui-grid \
-		/www/components/mqttws
+		/www/components/mqttws \
+		/www/components/gzip \
+		/www/components/jquery \
+		/www/components/raphael
 	@scp app/$(BOOTSTRAP_CSS) $(USER)@$(HOST):/www/$(BOOTSTRAP_CSS)
 	@scp app/$(NG_UI_GRID_CSS) $(USER)@$(HOST):/www/styles
 	@scp app/$(NG_UI_GRID_FONT) $(USER)@$(HOST):/www/styles
@@ -43,6 +49,9 @@ init:
 	@scp app/$(NG_BOOTSTRAP_JS) $(USER)@$(HOST):/www/$(NG_BOOTSTRAP_JS)
 	@scp app/$(NG_UI_GRID_JS) $(USER)@$(HOST):/www/$(NG_UI_GRID_JS)
 	@scp app/$(MQTTWS_JS) $(USER)@$(HOST):/www/$(MQTTWS_JS)
+	@scp -r app/$(JQUERY_JS) $(USER)@$(HOST):www/$(JQUERY_JS)
+	@scp app/$(GZIP_JS) $(USER)@$(HOST):www/$(GZIP_JS)
+	@scp -r app/$(RAPHAEL_JS) $(USER)@$(HOST):www/$(RAPHAEL_JS)
 
 upload:
 	@scp app/$(INDEX) $(USER)@$(HOST):/www/$(INDEX)
