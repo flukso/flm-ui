@@ -22,7 +22,8 @@ angular.module('flmUiApp', [
     'ui.bootstrap',
     'ui.grid',
     'ui.grid.edit',
-    'ui.grid.rowEdit'
+    'ui.grid.rowEdit',
+    'ui.grid.selection'
   ])
   .config(function ($routeProvider) {
     $routeProvider

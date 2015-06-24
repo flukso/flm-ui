@@ -35,16 +35,21 @@ angular.module("flmUiApp")
             $scope.$apply();
         };
 
+        var kidSelected;
         $scope.kube = {
             columnDefs: [
-                { name: "kube_id", width: 100, enableCellEdit: false, pinnedLeft: true },
-                { name: "name", width: 200, cellTooltip: "double-click to edit" },
+                { name: "kube_id", width: 110, enableCellEdit: false, pinnedLeft: true },
+                { name: "name", width: 275, cellTooltip: "double-click to edit" },
                 { name: "type", width: 100, enableCellEdit: false },
-                { name: "software_version", width: 175, enableCellEdit: false },
+                { name: "sw_version", width: 110, enableCellEdit: false },
                 { name: "hardware_id", width: 300, enableCellEdit: false }
             ],
+            multiSelect: false,
             onRegisterApi: function(gridApi) {
                 $scope.gridApi = gridApi;
+                gridApi.selection.on.rowSelectionChanged($scope, function(row){
+                    kidSelected = (row.isSelected) ? row.entity.kube_id : null;
+                });
                 gridApi.rowEdit.on.saveRow($scope, function(rowEntity) {
                     var section = rowEntity.kube_id;
                     var name = rowEntity.name;
@@ -87,6 +92,14 @@ angular.module("flmUiApp")
                     });
 
             }, pushError);
+        };
+
+        $scope.deprovision = function() {
+            if (kidSelected) {
+                var cmd = "ubus call flukso.kube deprovision '{\"kid\": " + kidSelected + "}'"
+                flmRpc.call("sys", "exec", [cmd])
+                .then(function() {}, pushError);
+            }
         };
 
         var client;
@@ -132,7 +145,7 @@ angular.module("flmUiApp")
                         kube_id: kid,
                         name: kube[kid].name,
                         type: kubeTypes[kube[kid].hw_type],
-                        software_version: kube[kid].sw_version,
+                        sw_version: kube[kid].sw_version,
                         hardware_id: kube[kid].hw_id
                     });
                 }
