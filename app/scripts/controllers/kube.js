@@ -18,31 +18,10 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("KubeCtrl", ["$scope", "flmRpc", function($scope, flmRpc) {
+    .controller("KubeCtrl", ["$scope", "$modal", "flmRpc",
+    function($scope, $modal, flmRpc) {
         $scope.debug = false;
         $scope.alerts = [];
-        $scope.kube = {
-            columnDefs: [
-                { name: "kube_id", width: 100, enableCellEdit: false, pinnedLeft: true },
-                { name: "name", width: 200, cellTooltip: "double-click to edit" },
-                { name: "type", width: 100, enableCellEdit: false },
-                { name: "software_version", width: 175, enableCellEdit: false },
-                { name: "hardware_id", width: 300, enableCellEdit: false }
-            ],
-            onRegisterApi: function(gridApi) {
-                $scope.gridApi = gridApi;
-                gridApi.rowEdit.on.saveRow($scope, function(rowEntity) {
-                    console.log(rowEntity);
-                    var section = rowEntity.kube_id;
-                    var name = rowEntity.name;
-                    $scope.gridApi.rowEdit.setSavePromise(rowEntity,
-                        flmRpc.call("uci", "tset", ["kube", section, { name: name }])
-                        .then(flmRpc.call("uci", "commit", ["kube"]))
-                        .then(flmRpc.call("sys", "exec", ["ubus send flukso.sighup"]))
-                    );
-                });
-            }
-        };
 
         $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
@@ -56,13 +35,67 @@ angular.module("flmUiApp")
             $scope.$apply();
         };
 
+        $scope.kube = {
+            columnDefs: [
+                { name: "kube_id", width: 100, enableCellEdit: false, pinnedLeft: true },
+                { name: "name", width: 200, cellTooltip: "double-click to edit" },
+                { name: "type", width: 100, enableCellEdit: false },
+                { name: "software_version", width: 175, enableCellEdit: false },
+                { name: "hardware_id", width: 300, enableCellEdit: false }
+            ],
+            onRegisterApi: function(gridApi) {
+                $scope.gridApi = gridApi;
+                gridApi.rowEdit.on.saveRow($scope, function(rowEntity) {
+                    var section = rowEntity.kube_id;
+                    var name = rowEntity.name;
+                    $scope.gridApi.rowEdit.setSavePromise(rowEntity,
+                        flmRpc.call("uci", "tset", ["kube", section, { name: name }])
+                        .then(flmRpc.call("uci", "commit", ["kube"]))
+                        .then(flmRpc.call("sys", "exec", ["ubus send flukso.sighup"]))
+                    );
+                });
+            }
+        };
+
+        $scope.pair = function() {
+            flmRpc.call("sys", "exec", ["ubus send flukso.kube.pair"])
+            .then(function() {
+                var tpl =
+                    '<div class="modal-header">'+
+                    '<h4>Listening for Kube pair requests...</h4>'+
+                    '</div>'+
+                    '<div class="modal-body">'+
+                    '<div class="progress progress-striped {{progressStatus}} active">' +
+                    '<div class="bar" style="width: {{progress}}%;"></div>' +
+                    '</div>' +
+                    '</div>'+
+                    '<div class="modal-footer">'+
+                    '<button ng-click="close()" class="btn btn-primary" ng-disabled="closeDisabled">Close</button>'+
+                    '</div>';
+
+                var opts = {
+                    backdrop: true,
+                    keyboard: false,
+                    backdropClick: false,
+                    template: tpl,
+                    controller: "KubePairCtrl"
+
+                };
+
+                $modal.open(opts).result
+                    .then(function() {
+                    });
+
+            }, pushError);
+        };
+
         var client;
         var connectTimeout = 3; /* secs */
         var reconnectTimeout = 5e3; /* msecs */
         var broker = location.hostname;
         var port = 8083;
         var path = "/mqtt";
- 
+
         function mqttConnect() {
             var wsID = "flm-ui-mqtt-" + Date.now();
             client = new Paho.MQTT.Client(broker, port, path, wsID);
@@ -80,7 +113,6 @@ angular.module("flmUiApp")
         }
         function onConnect() {
             client.subscribe("/device/+/config/kube");
-            //client.subscribe("/device/+/config/sensor");
         }
         function onConnectionLost(msg) {
             if (msg.errorCode !== 0) pushError(msg.errorMessage);
@@ -107,6 +139,73 @@ angular.module("flmUiApp")
             }
             $scope.$apply();
         }
+
+        mqttConnect();
+}]);
+
+angular.module("flmUiApp")
+    .controller("KubePairCtrl", ["$scope", "$q", "$modalInstance",
+    function($scope, $q, $modalInstance) {
+        $scope.closeDisabled = true;
+        $scope.progress = 0;
+        $scope.progressStatus = "progress-info";
+        $scope.close = function(result) {
+            $modalInstance.close();
+        }
+
+        var paired = false;
+        var pairWindow = 20000; /* msecs */
+        var updateInterval = 1000;
+        var progressDelta = 100 * updateInterval / pairWindow;
+
+        var client;
+        var connectTimeout = 3; /* secs */
+        var reconnectTimeout = 5e3; /* msecs */
+        var broker = location.hostname;
+        var port = 8083;
+        var path = "/mqtt";
+        var firstMessage = true;
+
+        function mqttConnect() {
+            var wsID = "flm-ui-mqtt-" + Date.now();
+            client = new Paho.MQTT.Client(broker, port, path, wsID);
+            var options = {
+                timeout: connectTimeout,
+                onSuccess: onConnect,
+                onFailure: function() {}
+            };
+            client.onConnectionLost = function() {};
+            client.onMessageArrived = onMessageArrived;
+            client.connect(options);
+        }
+        function onConnect() {
+            client.subscribe("/device/+/config/kube");
+        }
+        function onMessageArrived(msg) {
+            if (firstMessage) {
+                firstMessage = false;
+            } else {
+                paired = true;
+                $scope.progress = 100;
+            }
+        }
+
+        var handle;
+        handle = setInterval(function() {
+            if ($scope.progress >= 100) {
+                $scope.closeDisabled = false;
+                if (paired) {
+                    $scope.progressStatus = "progress-success";
+                } else {
+                    $scope.progressStatus = "progress-danger";
+                }
+                clearInterval(handle);
+                client.disconnect();
+            } else {
+                $scope.progress += progressDelta;
+            };
+            $scope.$apply();
+        }, updateInterval);
 
         mqttConnect();
 }]);

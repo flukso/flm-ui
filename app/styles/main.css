@@ -83,3 +83,7 @@ form[name="servicesForm"] .control-label {
     width: 100%;
     height: 640px;
 }
+
+button.kube {
+    margin: 16px 0px;
+}
