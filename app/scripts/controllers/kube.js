@@ -94,12 +94,52 @@ angular.module("flmUiApp")
             }, pushError);
         };
 
-        $scope.deprovision = function() {
-            if (kidSelected) {
-                var cmd = "ubus call flukso.kube deprovision '{\"kid\": " + kidSelected + "}'"
-                flmRpc.call("sys", "exec", [cmd])
-                .then(function() {}, pushError);
+        $scope.sensors = function() {
+            if (!kidSelected) {
+                pushError("You need to select a Kube first.");
+                return;
             }
+
+            var tpl =
+                '<div class="modal-header">'+
+                '<h4>Kube {{kid}} sensors</h4>'+
+                '</div>'+
+                '<div class="modal-body">'+
+                '<div class="grid" id="sensors" ui-grid="sensors"></div>' +
+                '</div>'+
+                '<div class="modal-footer">'+
+                '<button ng-click="close()" class="btn btn-primary">Close</button>'+
+                '</div>';
+
+            var rslv = {
+                kid: function() {
+                    return kidSelected;
+                }
+            };
+
+            var opts = {
+                backdrop: true,
+                keyboard: false,
+                backdropClick: false,
+                template: tpl,
+                resolve: rslv,
+                controller: "KubeSensorCtrl"
+
+            };
+
+            $modal.open(opts).result
+                .then(function() {
+                });
+        };
+
+        $scope.deprovision = function() {
+            if (!kidSelected) {
+                pushError("You need to select a Kube first.");
+                return
+            }
+            var cmd = "ubus call flukso.kube deprovision '{\"kid\": " + kidSelected + "}'"
+            flmRpc.call("sys", "exec", [cmd])
+            .then(function() {}, pushError);
         };
 
         var client;
@@ -219,6 +259,64 @@ angular.module("flmUiApp")
             };
             $scope.$apply();
         }, updateInterval);
+
+        mqttConnect();
+}]);
+
+angular.module("flmUiApp")
+    .controller("KubeSensorCtrl", ["$scope", "$modalInstance", "kid",
+    function($scope, $modalInstance, kid) {
+        $scope.size = "lg";
+        $scope.kid = parseInt(kid);
+        $scope.sensors = {
+            columnDefs: [
+                { name: "sensor_id", width: 300, enableCellEdit: false, pinnedLeft: true },
+                { name: "type", width: 110, enableCellEdit: false },
+                { name: "data_type", width: 100, enableCellEdit: false }
+            ]
+        };
+
+        var client;
+        var connectTimeout = 3; /* secs */
+        var reconnectTimeout = 5e3; /* msecs */
+        var broker = location.hostname;
+        var port = 8083;
+        var path = "/mqtt";
+
+        function mqttConnect() {
+            var wsID = "flm-ui-mqtt-" + Date.now();
+            client = new Paho.MQTT.Client(broker, port, path, wsID);
+            var options = {
+                timeout: connectTimeout,
+                onSuccess: onConnect,
+                onFailure: function() {}
+            };
+            client.onConnectionLost = function() {};
+            client.onMessageArrived = onMessageArrived;
+            client.connect(options);
+        }
+        function onConnect() {
+            client.subscribe("/device/+/config/sensor");
+        }
+        function onMessageArrived(msg) {
+            console.log(msg);
+            var sensors = JSON.parse(msg.payloadString);
+            for (var sidx in sensors) {
+                if (parseInt(sidx) && sensors[sidx].kid == $scope.kid) {
+                    $scope.sensors.data.push({
+                        sensor_id: sensors[sidx].id,
+                        type: sensors[sidx].type,
+                        data_type: sensors[sidx].data_type
+                    });
+                }
+            }
+            $scope.$apply();
+        }
+
+        $scope.close = function(result) {
+            client.disconnect();
+            $modalInstance.close();
+        }
 
         mqttConnect();
 }]);
