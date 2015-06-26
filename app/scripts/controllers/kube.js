@@ -18,8 +18,8 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("KubeCtrl", ["$scope", "$modal", "flmRpc",
-    function($scope, $modal, flmRpc) {
+    .controller("KubeCtrl", ["$rootScope", "$scope", "$modal", "flmRpc",
+    function($rootScope, $scope, $modal, flmRpc) {
         $scope.debug = false;
         $scope.alerts = [];
 
@@ -75,12 +75,20 @@ angular.module("flmUiApp")
             }
         };
 
+        $scope.disabled = function() {
+            if ($rootScope.model == "FLM02B") {
+                return false
+            } else {
+                return true
+            }
+        }
+
         $scope.pair = function() {
             flmRpc.call("sys", "exec", ["ubus send flukso.kube.pair"])
             .then(function() {
                 var tpl =
                     '<div class="modal-header">'+
-                    '<h4>Listening for Kube pair requests...</h4>'+
+                    '<h4>Listening for Kube pairing requests...</h4>'+
                     '</div>'+
                     '<div class="modal-body">'+
                     '<div class="progress progress-striped {{progressStatus}} active">' +
