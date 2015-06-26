@@ -51,8 +51,21 @@ angular.module("flmUiApp")
                     kidSelected = (row.isSelected) ? row.entity.kube_id : null;
                 });
                 gridApi.rowEdit.on.saveRow($scope, function(rowEntity) {
+                    function sanitize(input) {
+                        var filter = /^[\w -]$/;
+                        var output = "";
+                        for (var i=0; i<32; i++) {
+                            var chr = input.substr(i, 1);
+                            if (chr == "") break;
+                            if (filter.test(chr)) {
+                                output += chr;
+                            }
+                        }
+                        return output;
+                    }
+
                     var section = rowEntity.kube_id;
-                    var name = rowEntity.name;
+                    var name = sanitize(rowEntity.name);
                     $scope.gridApi.rowEdit.setSavePromise(rowEntity,
                         flmRpc.call("uci", "tset", ["kube", section, { name: name }])
                         .then(flmRpc.call("uci", "commit", ["kube"]))
