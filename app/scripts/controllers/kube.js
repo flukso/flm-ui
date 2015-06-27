@@ -77,9 +77,9 @@ angular.module("flmUiApp")
 
         $scope.disabled = function() {
             if ($rootScope.model == "FLM02B") {
-                return false
+                return false;
             } else {
-                return true
+                return true;
             }
         }
 
@@ -105,7 +105,6 @@ angular.module("flmUiApp")
                     backdropClick: false,
                     template: tpl,
                     controller: "KubePairCtrl"
-
                 };
 
                 $modal.open(opts).result
@@ -145,7 +144,6 @@ angular.module("flmUiApp")
                 template: tpl,
                 resolve: rslv,
                 controller: "KubeSensorCtrl"
-
             };
 
             $modal.open(opts).result
