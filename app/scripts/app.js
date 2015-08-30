@@ -22,7 +22,8 @@ angular.module('flmUiApp', [
     'ui.bootstrap',
     'ui.grid',
     'ui.grid.edit',
-    'ui.grid.rowEdit'
+    'ui.grid.rowEdit',
+    'ui.grid.selection'
   ])
   .config(function ($routeProvider) {
     $routeProvider
@@ -71,6 +72,11 @@ angular.module('flmUiApp', [
         controller: 'ChartCtrl',
         tagName: 'chart'
       })
+      .when('/consumption', {
+        templateUrl: 'views/consumption.html',
+        controller: 'ConsumptionCtrl',
+        tagName: 'consumption'
+      })
       .when('/gauge', {
         templateUrl: 'views/gauge.html',
         controller: 'GaugeCtrl',
@@ -89,6 +95,70 @@ angular.module('flmUiApp', [
       .otherwise({
         redirectTo: '/'
       });
+  })
+  .controller('MenuCtrl', function($scope) {
+    $scope.menus = [
+  {
+    title: "configuration", 
+    action: "#", 
+    menus: [
+      {
+        title: "status",
+        action: "#/status"
+      },
+      {
+        title: "wifi",
+        action: "#/wifi"
+      },
+      {
+        title: "sensor",
+        action: "#/sensor"
+      },
+      {
+        title: "kube",
+        action: "#/kube"
+      },
+      {
+        title: "services",
+        action: "#/services"
+      },
+      {
+        title: "syslog",
+        action: "#/syslog"
+      },
+      {
+        title: "mqtt",
+        action: "#/mqtt"
+      }
+    ]
+  },
+  {
+    title: "visualization", 
+    action: "#", 
+    menus: [
+      {
+        title: "chart",
+        action: "#/chart"
+      },
+      {
+        title: "consumption",
+        action: "#/consumption"
+      },
+      {
+        title: "gauge",
+        action: "#/gauge"
+      },
+      {
+        title: "graph",
+        action: "#/graph"
+      },
+      {
+        title: "panel",
+        action: "#/panel"
+      }
+    ]
+  }
+]
   })
   .run(function($rootScope, $route) {
     $rootScope.$on("$routeChangeSuccess", function(ngEvent, currRoute, prevRoute) {
