@@ -55,7 +55,7 @@ var ConsumptionCtrl = function($scope) {
     }
     // event handler on connection established
     function onConnect() {
-        client.subscribe("/device/#");
+        client.subscribe("/device/+/config/sensor");
         client.subscribe("/sensor/+/gauge");
     }
     // event handler on connection lost
@@ -126,6 +126,9 @@ var ConsumptionCtrl = function($scope) {
                 break;
 
               case 2:
+                if (value[1] !== "W") break;
+                sensor.value = value[0];
+                sensor.unit = value[1];
                 break;
 
               case 3:
@@ -142,13 +145,21 @@ var ConsumptionCtrl = function($scope) {
               default:
                 break;
             }
-            // now build the gauge display
+            // set up the selection and the local storage of sensor flow direction
             if (sensor.type == null && sensor.unit === "W") {
-                $("#choices").append("<div class='form-inline'>" + "<label for='type " + sensor.name + "' class='control-label span2'>" + sensor.name + "</label>" + "<select id='type " + sensor.name + "'>" + "<option>Consumption</option>" + "<option>Production</option>" + "</select>" + "</div>");
+                $("#choices").append("<div class='form-inline'>" + "<label for='" + sensor.id + "' class='control-label span2'>" + sensor.name + "</label>" + "<select id='" + sensor.id + "'>" + "<option>Consumption</option>" + "<option>Production</option>" + "</select>" + "</div>");
+                // on change of flow direction store the respective value
+                $("#" + sensor.id).change(sensor, function(event) {
+                    localStorage.setItem(event.data.id, event.target.value);
+                    sensors[event.data.id].type = event.target.value;
+                });
+                // retrieve a flow direction value that may be previously stored
+                var dirVal = localStorage.getItem(sensor.id);
+                if (dirVal !== null) {
+                    $("#" + sensor.id).val(dirVal);
+                }
+                sensor.type = $("#" + sensor.id).val();
             }
-            // compute the selected sensor type
-            var selElt = document.getElementById("type " + sensor.name);
-            sensor.type = selElt.options[selElt.selectedIndex].value;
             sensors[sensorId] = sensor;
             break;
 
@@ -182,6 +193,20 @@ var ConsumptionCtrl = function($scope) {
         var selfuseValue = productionValue > consumptionValue ? consumptionValue : productionValue;
         var supplyValue = productionValue > consumptionValue ? productionValue - consumptionValue : 0;
         var obtainedValue = consumptionValue - productionValue > 0 ? consumptionValue - productionValue : 0;
+        // write the values to the display
+        $("#grid").html(gridValue + "W");
+        $("#supply").html(supplyValue + "W");
+        $("#production").html(productionValue + "W");
+        $("#selfuse").html(selfuseValue + "W");
+        $("#consumption").html(consumptionValue + "W");
+        $("#obtained").html(obtainedValue + "W");
+        if (productionValue >= consumptionValue) {
+            $("#status").css("background-color", "green");
+        } else {
+            $("#status").css("background-color", "red");
+        }
+    }
+    function init_display() {
         // compute the scaling
         $("#image").css("position", "relative");
         var scale = $("#image").width() / 1226;
@@ -212,19 +237,8 @@ var ConsumptionCtrl = function($scope) {
         $("#status").css("height", 360 * scale + "px");
         $("#status").css("border-radius", 60 * scale + "px");
         $("#status").css("opacity", "0.2");
-        // write the values to the display
-        $("#grid").html(gridValue + "W");
-        $("#supply").html(supplyValue + "W");
-        $("#production").html(productionValue + "W");
-        $("#selfuse").html(selfuseValue + "W");
-        $("#consumption").html(consumptionValue + "W");
-        $("#obtained").html(obtainedValue + "W");
-        if (productionValue >= consumptionValue) {
-            $("#status").css("background-color", "green");
-        } else {
-            $("#status").css("background-color", "red");
-        }
     }
+    init_display();
     mqttConnect();
 };
 
