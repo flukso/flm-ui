@@ -67,9 +67,98 @@ angular.module('flmUiApp', [
         controller: 'MqttCtrl',
         tagName: 'mqtt'
       })
+      .when('/chart', {
+        templateUrl: 'views/chart.html',
+        controller: 'ChartCtrl',
+        tagName: 'chart'
+      })
+      .when('/consumption', {
+        templateUrl: 'views/consumption.html',
+        controller: 'ConsumptionCtrl',
+        tagName: 'consumption'
+      })
+      .when('/gauge', {
+        templateUrl: 'views/gauge.html',
+        controller: 'GaugeCtrl',
+        tagName: 'gauge'
+      })
+      .when('/graph', {
+        templateUrl: 'views/graph.html',
+        controller: 'GraphCtrl',
+        tagName: 'graph'
+      })
+      .when('/panel', {
+        templateUrl: 'views/panel.html',
+        controller: 'PanelCtrl',
+        tagName: 'panel'
+      })	  
       .otherwise({
         redirectTo: '/'
       });
+  })
+  .controller('MenuCtrl', function($scope) {
+    $scope.menus = [
+  {
+    title: "configuration", 
+    action: "#", 
+    menus: [
+      {
+        title: "status",
+        action: "#/status"
+      },
+      {
+        title: "wifi",
+        action: "#/wifi"
+      },
+      {
+        title: "sensor",
+        action: "#/sensor"
+      },
+      {
+        title: "kube",
+        action: "#/kube"
+      },
+      {
+        title: "services",
+        action: "#/services"
+      },
+      {
+        title: "syslog",
+        action: "#/syslog"
+      },
+      {
+        title: "mqtt",
+        action: "#/mqtt"
+      }
+    ]
+  },
+  {
+    title: "visualization", 
+    action: "#", 
+    menus: [
+      {
+        title: "chart",
+        action: "#/chart"
+      },
+      {
+        title: "consumption",
+        action: "#/consumption"
+      },
+      {
+        title: "gauge",
+        action: "#/gauge"
+      },
+      {
+        title: "graph",
+        action: "#/graph"
+      },
+      {
+        title: "panel",
+        action: "#/panel"
+      }
+    ]
+  }
+]
   })
   .run(function($rootScope, $route) {
     $rootScope.$on("$routeChangeSuccess", function(ngEvent, currRoute, prevRoute) {
