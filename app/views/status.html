@@ -86,27 +86,6 @@
             </div>
         </div>
     </div>
-
-    <div class="well well-large">
-        <span class="label label-success" ng-show="!syncErr">OK</span>
-        <span class="label label-important" ng-show="syncErr">ERROR</span>
-        <h4>Sensor config synchronisation</h4>
-        <div class="control-group">
-            <label for="synctime" class="control-label">Last</label>
-            <div class="controls">
-                <span name="synctime" class="input uneditable-input">{{sync.time}}</span>
-            </div>
-        </div>
-        <div class="control-group">
-            <label for="syncstatus" class="control-label">Status</label>
-            <div class="controls">
-                <span name="syncstatus" class="input uneditable-input">{{sync.status}}</span>
-                <span class="help-inline" ng-show="noSync && !pingErr">Now's the time to configure the sensors.</span>
-                <span class="help-inline error" ng-show="serverSyncErr">Make sure the FLM is connected to the internet before saving the sensors.</span>
-                <span class="help-inline error" ng-show="syncErr && !serverSyncErr">Internal error. Please report this error message to Flukso.</span>
-             </div>
-        </div>
-    </div>
 </form>
  
 <div ng-show="debug">

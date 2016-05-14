@@ -31,15 +31,11 @@ angular.module("flmUiApp")
         $scope.quality = "";
         $scope.ip = "";
         $scope.ping = "";
-        $scope.sync = {};
 
         $scope.timeSyncErr = false;
         $scope.assocErr = false;
         $scope.ipErr = false;
         $scope.pingErr = false;
-        $scope.syncErr = false;
-        $scope.serverSyncErr = false;
-        $scope.noSync = false;
  
         $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
@@ -141,21 +137,5 @@ angular.module("flmUiApp")
             },
             pushError
         );
-
-        flmRpc.call("uci", "get_all", ["flukso"]).then(
-            function(flukso) {
-                var time = new Date(flukso.fsync.time * 1e3);
-
-                $scope.syncErr = flukso.fsync.exit_status > 0;
-                $scope.serverSyncErr = flukso.fsync.exit_status == 7;
-                $scope.noSync = flukso.fsync.exit_status == -1;
-                $scope.sync = {
-                    time: time.toLocaleString(),
-                    status: flukso.fsync.exit_string
-                }
-            },
-            pushError
-        );
-
     }
 );
