@@ -52,11 +52,6 @@ angular.module('flmUiApp', [
         controller: 'StatusCtrl',
         tagName: 'status'
       })
-      .when('/services', {
-        templateUrl: 'views/services.html',
-        controller: 'ServicesCtrl',
-        tagName: 'services'
-      })
       .when('/syslog', {
         templateUrl: 'views/syslog.html',
         controller: 'SyslogCtrl',
