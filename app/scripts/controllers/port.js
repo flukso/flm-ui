@@ -18,7 +18,7 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("SensorCtrl", function($rootScope, $scope, $modal, flmRpc) {
+    .controller("PortCtrl", function($rootScope, $scope, $modal, flmRpc) {
         $scope.debug = false;
         $scope.alerts = [];
         $scope.noOfSensors = 5;

@@ -32,20 +32,20 @@ angular.module('flmUiApp', [
         controller: 'MainCtrl',
         tagName: null
       })
-      .when('/sensor', {
-        templateUrl: 'views/sensor.html',
-        controller: 'SensorCtrl',
-        tagName: 'sensor'
+      .when('/port', {
+        templateUrl: 'views/port.html',
+        controller: 'PortCtrl',
+        tagName: 'port'
       })
       .when('/kube', {
         templateUrl: 'views/kube.html',
         controller: 'KubeCtrl',
         tagName: 'kube'
       })
-      .when('/wifi', {
-        templateUrl: 'views/wifi.html',
-        controller: 'WifiCtrl',
-        tagName: 'wifi'
+      .when('/network', {
+        templateUrl: 'views/network.html',
+        controller: 'NetworkCtrl',
+        tagName: 'network'
       })
       .when('/status', {
         templateUrl: 'views/status.html',

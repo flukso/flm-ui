@@ -18,7 +18,7 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("WifiCtrl", function($scope, $modal, flmRpc) {
+    .controller("NetworkCtrl", function($scope, $modal, flmRpc) {
         $scope.debug = false;
         $scope.alerts = [];
         $scope.aps = {};
