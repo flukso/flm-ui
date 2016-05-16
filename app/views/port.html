@@ -1,75 +1,53 @@
 <div>
     <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
 </div>
-<form name="sensorForm" class="form-horizontal" ng-submit="save()">
+<form name="portForm" class="form-horizontal" ng-submit="save()">
     <div class="well well-large">
         <div class="control-group">
-            <label for="max_analog_sensors" class="control-label">Current clamp ports</label>
+            <label for="phase" class="control-label">Electrical System</label>
             <div class="controls">
-                <select name="max_analog_sensors" ng-model="sensors.main.max_analog_sensors" ng-change="maxAnaSensorsChange()" ng-disabled="disable('max_analog_sensors')">
-                    <option>1</option>
-                    <option>3</option>
-                </select>
-            </div>
-        </div>
-        <div class="control-group">
-            <label for="phase" class="control-label">Number of phases</label>
-            <div class="controls">
-                <select name="phase" ng-model="sensors.main.phase" ng-change="phaseChange()" ng-disabled="disable('phase')">
-                    <option>1</option>
-                    <option>3</option>
-                </select>
-            </div>
-        </div>
-        <div class="control-group">
-            <label for="dsmr" class="control-label">DSMR version</label>
-            <div class="controls">
-                <select name="dsmr" ng-model="sensors.main.dsmr" ng-disabled="disable('dsmr')">
-                    <option>2.2</option>
-                    <option>4.0</option>
+                <select name="phase" ng-model="ports.main.phase" ng-disabled="disable('phase')">
+                    <option>1phase</option>
+                    <option>3phase with N</option>
+                    <option>3phase without N</option>
                 </select>
             </div>
         </div>
         <div class="control-group">
             <label for="led" class="control-label">LED mode</label>
             <div class="controls">
-                <select name="led" ng-model="sensors.main.led_mode" ng-disabled="disable('led')">
+                <select name="led" ng-model="ports.main.led_mode" ng-disabled="disable('led')">
                     <option>heartbeat</option>
                     <option>port 4</option>
                     <option>port 5</option>
+                    <option>port 6</option>
                 </select>
             </div>
         </div>
     </div>
     <div class="well well-large">
         <div class="control-group">
-            <label for="sensor" class="control-label"><strong>Sensor</strong></label>
+            <label for="port" class="control-label"><strong>Port</strong></label>
             <div class="controls">
-                <strong><pagination total-items="noOfSensors" items-per-page="1" ng-model="i" class="sensor" previous-text="&laquo;" next-text="&raquo;"></pagination></strong>
+                <strong><pagination total-items="noOfPorts" items-per-page="1" ng-model="i" class="port" previous-text="&laquo;" next-text="&raquo;"></pagination></strong>
             </div>
         </div>
         <div class="control-group">
             <label for="enable" class="control-label">Enable</label>
             <div class="controls">
-                <input name="enable" type="checkbox" ng-true-value="'1'" ng-false-value="'0'" ng-model="sensors[i].enable" ng-disabled="disable('enable')">
-            </div>
-        </div>
-        <div class="control-group">
-            <label for="id" class="control-label">Identification</label>
-            <div class="controls">
-                <input name="id" type="text" class="input-xlarge" ng-model="sensors[i].id" disabled>
+                <input name="enable" type="checkbox" ng-true-value="'1'" ng-false-value="'0'" ng-model="ports[i].enable" ng-disabled="disable('enable')">
             </div>
         </div>
         <div class="control-group">
             <label for="class" class="control-label">Class</label>
             <div class="controls">
-                <input name="class" type="text" ng-model="sensors[i].class" disabled>
+                <input name="class" type="text" ng-model="ports[i].class" disabled>
             </div>
         </div>
-        <div class="control-group">
+        <div class="control-group" ng-show="show('type')">
             <label for="type" class="control-label">Type</label>
             <div class="controls">
-                <select name="type" ng-model="sensors[i].type" ng-disabled="disable('type')">
+                <select name="type" ng-model="ports[i].type" ng-disabled="disable('type')">
                     <option>electricity</option>
                     <option>water</option>
                     <option>gas</option>
@@ -79,23 +57,14 @@
         <div class="control-group">
             <label for="name" class="control-label">Name</label>
             <div class="controls">
-                <input name="name" type="text" ng-model="sensors[i].function" ng-pattern="patternName" ng-disabled="disable('name')" ng-required="!disable('name')">
-                <span class="help-inline error" ng-show="sensorForm.name.$error.required">Required field.</span>
-                <span class="help-inline error" ng-show="sensorForm.name.$error.pattern">Wrong format. Only use alphanumeric, space, underscore and hyphen characters.</span>
+                <input name="name" type="text" ng-model="ports[i].name" ng-pattern="patternName" ng-disabled="disable('name')">
+                <span class="help-inline error" ng-show="portForm.name.$error.pattern">Wrong format. Only use alphanumeric, space, underscore and hyphen characters.</span>
             </div>
         </div>
-        <div class="control-group">
-            <label for="voltage" class="control-label">Voltage</label>
-            <div class="controls">
-                <input name="voltage" type="text" ng-model="sensors[i].voltage" ng-pattern="patternVoltage" ng-disabled="disable('voltage')" ng-required="!disable('voltage')">
-                <span class="help-inline error" ng-show="sensorForm.voltage.$error.required">Required field.</span>
-                <span class="help-inline error" ng-show="sensorForm.voltage.$error.pattern">Wrong format. Only integer values allowed.</span>
-            </div>
-        </div>
-        <div class="control-group">
+        <div class="control-group" ng-show="show('current')">
             <label for="current" class="control-label">Current</label>
             <div class="controls">
-                <select name="current" ng-model="sensors[i].current" ng-disabled="disable('current')">
+                <select name="current" ng-model="ports[i].current" ng-disabled="disable('current')">
                     <option>50</option>
                     <option>100</option>
                     <option>250</option>
@@ -103,21 +72,21 @@
                 </select>
             </div>
         </div>
-        <div class="control-group">
+        <div class="control-group" ng-show="show('constant')">
             <label for="constant" class="control-label">Constant</label>
             <div class="controls">
-                <input name="constant" type="text" ng-model="sensors[i].constant" ng-pattern="patternConstant" ng-disabled="disable('constant')" ng-required="!disable('constant')">
-                <span class="help-inline error" ng-show="sensorForm.constant.$error.required">Required field.</span>
-                <span class="help-inline error" ng-show="sensorForm.constant.$error.pattern">Wrong number format.<ul><li>Meter constants for electricity are expressed in Wh/pulse.</li><li>Meter constants for water and gas are entered in L/pulse.</li><li>Meter constants can range from 0.001 to 65535.999.</li><li>Decimal values should use a dot, not a comma.</li></ul></span>
+                <input name="constant" type="text" ng-model="ports[i].constant" ng-pattern="patternConstant" ng-disabled="disable('constant')" ng-required="!disable('constant')">
+                <span class="help-inline error" ng-show="portForm.constant.$error.required">Required field.</span>
+                <span class="help-inline error" ng-show="portForm.constant.$error.pattern">Wrong number format.<ul><li>Meter constants for electricity are expressed in Wh/pulse.</li><li>Meter constants for water and gas are entered in L/pulse.</li><li>Meter constants can range from 0.001 to 65535.999.</li><li>Decimal values should use a dot, not a comma.</li></ul></span>
             </div>
         </div>
     </div>
     <div class="control-group">
         <div class="controls">
-            <button type="submit" class="btn btn-primary" ng-disabled="sensorForm.$invalid">Save</button>
+            <button type="submit" class="btn btn-primary" ng-disabled="portForm.$invalid">Save</button>
         </div>
     </div>
 </form>
 <div ng-show="debug">
-    {{sensors}}
+    {{ports}}
 </div>

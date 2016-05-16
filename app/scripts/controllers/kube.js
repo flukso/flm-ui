@@ -76,11 +76,7 @@ angular.module("flmUiApp")
         };
 
         $scope.disabled = function() {
-            if ($rootScope.model == "FLM02B") {
-                return false;
-            } else {
-                return true;
-            }
+            return true;
         }
 
         $scope.pair = function() {
