@@ -83,10 +83,12 @@
     </div>
     <div class="control-group">
         <div class="controls">
-            <button type="submit" class="btn btn-primary" ng-disabled="portForm.$invalid">Save</button>
+            <button class="btn btn-primary port" ng-click="commit()" ng-disabled="portForm.$invalid">Save</button>
+            <button class="btn btn-primary port" ng-click="sensors()">Sensors</button>
         </div>
     </div>
 </form>
 <div ng-show="debug">
     {{ports}}
+    {{flukso}}
 </div>

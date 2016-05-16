@@ -84,6 +84,6 @@ form[name="servicesForm"] .control-label {
     height: 640px;
 }
 
-button.kube {
+button.kube, button.port {
     margin: 24px 8px 0px 0px;
 }

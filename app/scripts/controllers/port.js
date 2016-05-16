@@ -18,11 +18,14 @@
 "use strict";
 
 angular.module("flmUiApp")
-    .controller("PortCtrl", function($rootScope, $scope, $modal, flmRpc) {
+    .controller("PortCtrl", ["$rootScope", "$scope", "$modal", "flmRpc",
+    function($rootScope, $scope, $modal, flmRpc) {
         $scope.debug = false;
         $scope.alerts = [];
         $scope.ports = null;
+        $scope.flukso = null;
         $scope.noOfPorts = 7;
+        $scope.noOfSensors = 128;
         $scope.i = 1;
 
         $scope.closeAlert = function(index) {
@@ -112,6 +115,7 @@ angular.module("flmUiApp")
                 '<div class="modal-body">'+
                 '<div class="grid" id="sensors" ui-grid="sensors"></div>' +
                 '</div>'+
+                /* '<p>{{sensors}}</p>' + */
                 '<div class="modal-footer">'+
                 '<button ng-click="close()" class="btn btn-primary">Close</button>'+
                 '</div>';
@@ -123,6 +127,12 @@ angular.module("flmUiApp")
                 sensors: function() {
                     var sensors = {};
 
+                    for (var i = 1; i <= $scope.noOfSensors; i++) {
+                        if ($scope.flukso[i.toString()].port &&
+                            $scope.flukso[i.toString()].port[0] == $scope.i.toString()) {
+                            sensors[i] = $scope.flukso[i.toString()];
+                        }
+                    }
                     return sensors;
                 }
             };
@@ -141,7 +151,7 @@ angular.module("flmUiApp")
                 });
         };
 
-        $scope.save = function() {
+        $scope.commit = function() {
             var tpl =
                 '<div class="modal-header">'+
                 '<h2>Updating port configuration</h2>'+
@@ -204,7 +214,8 @@ angular.module("flmUiApp")
 
                     for (var i = 1; i <= 36; i++) {
                         flukso[i.toString()] = {
-                            enable: $scope.ports[Math.floor((i - 1) / 12) + 1].enable
+                            enable: i % 12 == 0 ? 0 : /* do not enable alpha */
+                                $scope.ports[Math.floor((i - 1) / 12) + 1].enable
                         }
                     }
                     for (var i = 4; i < 7; i++) { /* only apply to pulse ports */
@@ -276,6 +287,7 @@ angular.module("flmUiApp")
 
         flmRpc.call("uci", "get_all", ["flukso"]).then(
             function(flukso) {
+                $scope.flukso = flukso;
                 for (var i = 4; i < 7; i++) { /* only apply to pulse ports */
                     var offset = 33;
                     var j = offset + i;
@@ -284,8 +296,7 @@ angular.module("flmUiApp")
             },
             pushError
         );
-    }
-);
+}]);
 
 angular.module("flmUiApp")
     .controller("PortSaveCtrl", ["$scope", "$q", "flmRpc", "$modalInstance", "flx", "flukso",
@@ -346,4 +357,32 @@ angular.module("flmUiApp")
             };
             $scope.closeDisabled = false;
         })
+    }]);
+
+angular.module("flmUiApp")
+    .controller("PortSensorCtrl", ["$scope", "$modalInstance", "port", "sensors",
+    function($scope, $modalInstance, port, sensors) {
+        $scope.size = "lg";
+        $scope.close = function(result) {
+            $modalInstance.close();
+        }
+        $scope.port = port;
+        $scope.sensors = {
+            columnDefs: [
+                { name: "sensor_id", width: 300, enableCellEdit: false, pinnedLeft: true },
+                { name: "subtype", width: 110, enableCellEdit: false },
+                { name: "data_type", width: 100, enableCellEdit: false }
+            ],
+            data: []
+        };
+
+        for (var sidx in sensors) {
+            if (sensors[sidx].subtype != "alpha") {
+                $scope.sensors.data.push({
+                    sensor_id: sensors[sidx].id,
+                    subtype: sensors[sidx].subtype,
+                    data_type: sensors[sidx].data_type
+                });
+            }
+        }
     }]);
