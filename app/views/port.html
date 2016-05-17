@@ -1,7 +1,7 @@
 <div>
     <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
 </div>
-<form name="portForm" class="form-horizontal" ng-submit="save()">
+<form name="portForm" class="form-horizontal">
     <div class="well well-large">
         <div class="control-group">
             <label for="phase" class="control-label">Electrical System</label>
