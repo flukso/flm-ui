@@ -21,6 +21,8 @@ angular.module("flmUiApp")
     .controller("NetworkCtrl", function($scope, $modal, flmRpc) {
         $scope.debug = false;
         $scope.alerts = [];
+        $scope.interface = null;
+        $scope.network = {};
         $scope.aps = {};
         $scope.wireless = {};
         $scope.ssid = "";
@@ -162,6 +164,20 @@ angular.module("flmUiApp")
                 '</div>';
 
             var rslv = {
+                network: function() {
+                    var network = { wan : {}};
+
+                    switch($scope.interface) {
+                    case "wifi":
+                        network.wan.ifname = "wlan0";
+                        break;
+                    case "ethernet":
+                        network.wan.ifname = "eth1";
+                        break;
+                    }
+
+                    return network;
+                },
                 wireless: function() {
                     var wireless = {};
 
@@ -173,18 +189,21 @@ angular.module("flmUiApp")
                         return hexstr;
                     }
 
+                    if (!$scope.ssid) {
+                        return wireless;
+                    }
                     /* sanitize the key entry */
                     switch ($scope.aps[$scope.ssid].uciEncr) {
-                        case "none":
-                            $scope.key = "";
-                            break;
-                        case "wep":
-                            switch ($scope.key.length) {
-                                case 5:
-                                case 13:
-                                    $scope.key = ascii2hex($scope.key);
-                            }
-                            break;
+                    case "none":
+                        $scope.key = "";
+                        break;
+                    case "wep":
+                        switch ($scope.key.length) {
+                            case 5:
+                            case 13:
+                                $scope.key = ascii2hex($scope.key);
+                        }
+                        break;
                     }
 
                     wireless[$scope.section] = {
@@ -203,8 +222,7 @@ angular.module("flmUiApp")
                 backdropClick: false,
                 template: tpl,
                 resolve: rslv,
-                controller: "WifiSaveCtrl"
-
+                controller: "NetworkSaveCtrl"
             };
 
             $modal.open(opts).result
@@ -224,11 +242,28 @@ angular.module("flmUiApp")
                 });
         };
 
+        flmRpc.call("uci", "get_all", ["network"])
+        .then(function(network) {
+                $scope.network = network;
+
+                switch(network.wan.ifname) {
+                case "wlan0":
+                    $scope.interface = "wifi";
+                    break;
+                case "eth1":
+                    $scope.interface = "ethernet";
+                    break;
+                }
+            },
+            pushError)
+
         flmRpc.call("sys", "wifi.iwinfo", ["wlan0", "scanlist"])
-        .then(
-            function(iwinfo) {
+        .then(function(iwinfo) {
                 $scope.ssidDisable = false;
 
+                if (!iwinfo) {
+                    return;
+                }
                 angular.forEach(iwinfo.scanlist, function(ap, key) {
                     $scope.aps[ap.ssid] = ap;
                     $scope.aps[ap.ssid].quality = ap.quality + "/" + ap.quality_max;
@@ -273,62 +308,56 @@ angular.module("flmUiApp")
     });
 
 angular.module("flmUiApp")
-    .controller("WifiSaveCtrl", ["$scope", "$q", "flmRpc", "$modalInstance", "wireless",
-    function($scope, $q, flmRpc, $modalInstance, wireless) {
+    .controller("NetworkSaveCtrl", ["$scope", "$q", "flmRpc", "$modalInstance", "network", "wireless",
+    function($scope, $q, flmRpc, $modalInstance, network, wireless) {
         $scope.wireless = wireless;
         $scope.closeDisabled = true;
         $scope.progress = 0;
         $scope.progressStatus = "progress-info";
-        $scope.progressLog = "Saving wifi parameters: ";
+        $scope.progressLog = "Saving network parameters: ";
         $scope.close = function(result) {
             $modalInstance.close();
         }
 
         var promiseUci = [];
 
-        for (var section in wireless) {
-            var promise = flmRpc.call("uci", "tset", ["wireless", section, wireless[section]]).then(
+        for (var section in network) {
+            var promise = flmRpc.call("uci", "tset", ["network", section, network[section]]).then(
                 function(result) {
-                    $scope.progress += 25;
-                    $scope.progressLog += result;
+                    $scope.progressLog += result + " ";
                 },
                 function(error) {
-                    $scope.progressLog += error;
+                    $scope.progressLog += "\n" + error;
                 }
             );
 
             promiseUci.push(promise);
         }
+        if (network.wan.iname == "wlan0") {
+            for (var section in wireless) {
+                var promise = flmRpc.call("uci", "tset", ["wireless", section, wireless[section]]).then(
+                    function(result) {
+                        $scope.progressLog += result + " ";
+                    },
+                    function(error) {
+                        $scope.progressLog += "\n" + error;
+                    }
+                );
+
+                promiseUci.push(promise);
+            }
+        }
 
         $q.all(promiseUci)
         .finally(function () {
-            flmRpc.call("uci", "commit", ["wireless"])
-            .then(
-                function(result) {
-                    $scope.progress += 25;
-                    $scope.progressLog += "\nCommitting changes: " + result;
-                },
-                function(error) {
-                    $scope.progressLog += "\nCommitting changes: " + error;
-                })
-            .finally(function () {
-                flmRpc.call("sys", "exec", ["/sbin/wifi up"])
-                .then(
-                    function(result) {
-                        $scope.progress += 50;
-                        $scope.progressLog += "\nRe-initializing wifi stack";
-                    },
-                    function(error) { 
-                        $scope.progressLog += "\nRe-initializing wifi stack: " + error;
-                    })
-                .finally(function() {
-                    $scope.closeDisabled = false;
-                    if ($scope.progress == 100) {
-                        $scope.progressStatus = "progress-success";
-                    } else {
-                        $scope.progressStatus = "progress-danger";
-                    };
-                }) 
-            })
-       });
+            $scope.progress = 50;
+            flmRpc.call("uci", "commit", ["network"]);
+            flmRpc.call("uci", "commit", ["wireless"]);
+            $scope.progressLog += "\nCommitting changes.";
+            flmRpc.call("sys", "exec", ["/etc/init.d/network restart"]);
+            $scope.progressLog += "\nRestarting network stack.";
+            $scope.progress = 100;
+            $scope.progressStatus = "progress-success";
+            $scope.closeDisabled = false;
+        });
     }]);

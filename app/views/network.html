@@ -2,8 +2,19 @@
     <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
 </div>
 
-<form name="wifiForm" class="form-horizontal" ng-submit="save()">
+<form name="networkForm" class="form-horizontal" ng-submit="save()">
     <div class="well well-large">
+        <div class="control-group">
+            <label for="network" class="control-label">Network</label>
+            <div class="controls">
+                <select name="interface" ng-model="interface">
+                    <option>wifi</option>
+                    <option>ethernet</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="well well-large" ng-show="interface=='wifi'">
         <div class="control-group">
             <label for="ssid" class="control-label">SSID</label>
             <div class="controls">
@@ -34,15 +45,15 @@
             <label for="key" class="control-label">Key</label>
             <div class="controls">
                 <input name="key" type="text" ng-model="key" ng-pattern="pattern" ng-disabled="disable()" ng-required="!disable()">
-                <span class="help-inline error" ng-show="wifiForm.key.$error.required">Required field.</span>
-                <span class="help-inline error" ng-show="wifiForm.key.$error.pattern">Wrong format. Use either 5/13 ASCII or 10/26 HEX characters as WEP key. A valid ASCII-based key will be translated into a HEX-based one. For WPA(2)-PSK encrypted networks, please enter your 8-to-63-character passphrase.
+                <span class="help-inline error" ng-show="networkForm.key.$error.required">Required field.</span>
+                <span class="help-inline error" ng-show="networkForm.key.$error.pattern">Wrong format. Use either 5/13 ASCII or 10/26 HEX characters as WEP key. A valid ASCII-based key will be translated into a HEX-based one. For WPA(2)-PSK encrypted networks, please enter your 8-to-63-character passphrase.
             </span>
             </div>
         </div>
     </div>
     <div class="control-group">
         <div class="controls">
-            <button type="submit" class="btn btn-primary" ng-disabled="wifiForm.$invalid">Save</button>
+            <button type="submit" class="btn btn-primary" ng-disabled="networkForm.$invalid && network.wan.interface=='wifi'">Save</button>
         </div>
     </div>
 </form>
