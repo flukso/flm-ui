@@ -223,7 +223,8 @@ angular.module("flmUiApp")
                         var j = offset + i;
                         flukso[j.toString()] = {
                             enable: $scope.ports[i].enable,
-                            type: $scope.ports[i].type
+                            type: $scope.ports[i].type,
+                            subtype: $scope.ports[i].type == "electricity" ? "pplus" : ""
                         }
                     }
                     return flukso;
