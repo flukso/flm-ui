@@ -344,19 +344,21 @@ angular.module("flmUiApp")
         .finally(function() {
             flmRpc.call("uci", "commit", ["flx"]);
             flmRpc.call("uci", "commit", ["flukso"]);
-            flmRpc.call("sys", "exec", ["ubus send flukso.sighup"]);
             $scope.progressLog += "\nCommitting changes.";
-            flmRpc.call("sys", "exec", ["ubus send flx.shift.calc"]);
-            $scope.progressLog += "\nCalculating shift parameters.";
-            $scope.progressLog += "\n\t* Make sure PV production is turned off."
-            $scope.progressLog += "\n\t* Make sure there's a decent load present on each phase."
-            $scope.progress += 6;
-            if ($scope.progress == 100) {
-                $scope.progressStatus = "progress-success";
-            } else {
-                $scope.progressStatus = "progress-danger";
-            };
-            $scope.closeDisabled = false;
+            flmRpc.call("sys", "exec", ["ubus send flukso.sighup"])
+            .then(setTimeout(function() {
+                flmRpc.call("sys", "exec", ["ubus send flx.shift.calc"]);
+                $scope.progressLog += "\nCalculating shift parameters.";
+                $scope.progressLog += "\n\t* Make sure PV production is turned off."
+                $scope.progressLog += "\n\t* Make sure there's a decent load present on each phase."
+                $scope.progress += 6;
+                if ($scope.progress == 100) {
+                    $scope.progressStatus = "progress-success";
+                } else {
+                    $scope.progressStatus = "progress-danger";
+                };
+                $scope.closeDisabled = false;
+            }, 5000));
         })
     }]);
 
