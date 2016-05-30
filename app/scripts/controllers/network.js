@@ -333,7 +333,7 @@ angular.module("flmUiApp")
 
             promiseUci.push(promise);
         }
-        if (network.wan.iname == "wlan0") {
+        if (network.wan.ifname == "wlan0") {
             for (var section in wireless) {
                 var promise = flmRpc.call("uci", "tset", ["wireless", section, wireless[section]]).then(
                     function(result) {
