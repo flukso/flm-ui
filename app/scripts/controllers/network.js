@@ -211,7 +211,10 @@ angular.module("flmUiApp")
                         encryption: $scope.aps[$scope.ssid].uciEncr,
                         key: $scope.key
                     };
-
+                    /* wireless.radio0.disabled=0 */
+                    wireless["radio0"] = {
+                        disabled: $scope.interface == "wifi" ? 0 : 1
+                    };
                     return wireless;
                 }
             };
@@ -278,7 +281,7 @@ angular.module("flmUiApp")
                     $scope.wireless = wireless;
 
                     angular.forEach(wireless, function(value, section) {
-                        if (section != "radio0" && wireless[section].ssid != "zwaluw") {
+                        if (section != "radio0") {
                             /* add the stored ssid to the scan list if it's not present yet */
                             if (!$scope.aps[wireless[section].ssid]) {
                                 $scope.aps[wireless[section].ssid] =
@@ -333,19 +336,17 @@ angular.module("flmUiApp")
 
             promiseUci.push(promise);
         }
-        if (network.wan.ifname == "wlan0") {
-            for (var section in wireless) {
-                var promise = flmRpc.call("uci", "tset", ["wireless", section, wireless[section]]).then(
-                    function(result) {
-                        $scope.progressLog += result + " ";
-                    },
-                    function(error) {
-                        $scope.progressLog += "\n" + error;
-                    }
-                );
+        for (var section in wireless) {
+            var promise = flmRpc.call("uci", "tset", ["wireless", section, wireless[section]]).then(
+                function(result) {
+                    $scope.progressLog += result + " ";
+                },
+                function(error) {
+                    $scope.progressLog += "\n" + error;
+                }
+            );
 
-                promiseUci.push(promise);
-            }
+            promiseUci.push(promise);
         }
 
         $q.all(promiseUci)
