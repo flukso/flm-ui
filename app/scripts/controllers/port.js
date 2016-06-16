@@ -351,6 +351,7 @@ angular.module("flmUiApp")
                 $scope.progressLog += "\nCalculating shift parameters.";
                 $scope.progressLog += "\n\t* Make sure PV production is turned off."
                 $scope.progressLog += "\n\t* Make sure there's a decent load present on each phase."
+                $scope.progressLog += "\nDone."
                 $scope.progress += 6;
                 if ($scope.progress == 100) {
                     $scope.progressStatus = "progress-success";

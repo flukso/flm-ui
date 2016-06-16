@@ -327,7 +327,7 @@ angular.module("flmUiApp")
         for (var section in network) {
             var promise = flmRpc.call("uci", "tset", ["network", section, network[section]]).then(
                 function(result) {
-                    $scope.progressLog += result + " ";
+                    $scope.progressLog += ".";
                 },
                 function(error) {
                     $scope.progressLog += "\n" + error;
@@ -339,7 +339,7 @@ angular.module("flmUiApp")
         for (var section in wireless) {
             var promise = flmRpc.call("uci", "tset", ["wireless", section, wireless[section]]).then(
                 function(result) {
-                    $scope.progressLog += result + " ";
+                    $scope.progressLog += ".";
                 },
                 function(error) {
                     $scope.progressLog += "\n" + error;
@@ -356,7 +356,7 @@ angular.module("flmUiApp")
             flmRpc.call("uci", "commit", ["wireless"]);
             $scope.progressLog += "\nCommitting changes.";
             flmRpc.call("sys", "exec", ["/etc/init.d/network restart"]);
-            $scope.progressLog += "\nRestarting network stack.";
+            $scope.progressLog += "\nRestarting network stack.\nDone.";
             $scope.progress = 100;
             $scope.progressStatus = "progress-success";
             $scope.closeDisabled = false;
