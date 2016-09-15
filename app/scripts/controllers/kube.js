@@ -76,7 +76,7 @@ angular.module("flmUiApp")
         };
 
         $scope.disabled = function() {
-            return true;
+            return false;
         }
 
         $scope.pair = function() {
