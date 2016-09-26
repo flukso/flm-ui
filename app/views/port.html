@@ -57,7 +57,7 @@
         <div class="control-group">
             <label for="name" class="control-label">Name</label>
             <div class="controls">
-                <input name="name" type="text" ng-model="ports[i].name" ng-pattern="patternName" ng-disabled="disable('name')">
+                <input name="name" type="text" ng-model="ports[i].name" ng-pattern="patternName" ng-disabled="disable('name')" ng-required="!disable('name')">
                 <span class="help-inline error" ng-show="portForm.name.$error.pattern">Wrong format. Only use alphanumeric, space, underscore and hyphen characters.</span>
             </div>
         </div>
