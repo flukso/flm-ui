@@ -123,7 +123,7 @@ angular.module("flmUiApp")
 
         /* duck typing in action
            see:  http://stackoverflow.com/questions/18900308/angularjs-dynamic-ng-pattern-validation */
-        $scope.pattern = (function() {
+        $scope.patternKey = (function() {
             var regex = {
                 "wep": /(^.{5}$)|(^.{13}$)|(^[a-fA-F0-9]{10}$)|(^[a-fA-F0-9]{26}$)/,
                 "wpa": /^.{8,63}$/
@@ -147,16 +147,37 @@ angular.module("flmUiApp")
             };
         })();
 
+        $scope.patternApn = (function() {
+            var regex = /^[\w\.\-]{1,32}$/;
+
+            return {
+                test: function(value) { 
+                    return regex.test(value);
+                }
+            };
+        })();
+
+        $scope.patternPincode = (function() {
+            var regex = /^[\d]{4,4}$/;
+
+            return {
+                test: function(value) { 
+                    return regex.test(value);
+                }
+            };
+        })();
+
         $scope.save = function() {
             var tpl =
                 '<div class="modal-header">'+
-                '<h2>Updating wifi configuration</h2>'+
+                '<h2>Updating network configuration</h2>'+
                 '</div>'+
                 '<div class="modal-body">'+
                 '<div class="progress progress-striped {{progressStatus}} active">' +
                 '<div class="bar" style="width: {{progress}}%;"></div>' +
                 '</div>' +
                 '<textarea id="progressLog" readonly="readonly">{{progressLog}}</textarea>'+
+                /*'<p>{{network}}</p>' +*/
                 /*'<p>{{wireless}}</p>' +*/
                 '</div>'+
                 '<div class="modal-footer">'+
@@ -165,14 +186,31 @@ angular.module("flmUiApp")
 
             var rslv = {
                 network: function() {
-                    var network = { wan : {}};
+                    var network = { };
 
                     switch($scope.interface) {
                     case "wifi":
-                        network.wan.ifname = "wlan0";
+                        network.wan = {
+                            ifname: "wlan0",
+                            proto: "dhcp"
+                        }
                         break;
                     case "ethernet":
-                        network.wan.ifname = "eth1";
+                        network.wan = {
+                            ifname: "eth1",
+                            proto: "dhcp"
+                        }
+                        break;
+                    case "3g":
+                        network.wan = {
+                            ifname: "ppp0",
+                            proto: "3g",
+                            device: "/dev/ttyUSB0",
+                            apn: $scope.network.wan.apn,
+                            pincode: $scope.network.wan.pincode,
+                            username: $scope.network.wan.username,
+                            password: $scope.network.wan.password
+                        }
                         break;
                     }
 
@@ -256,7 +294,9 @@ angular.module("flmUiApp")
                 case "eth1":
                     $scope.interface = "ethernet";
                     break;
-                }
+                case "ppp0":
+                    $scope.interface = "3g";
+              }
             },
             pushError)
 

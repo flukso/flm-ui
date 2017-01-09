@@ -10,6 +10,7 @@
                 <select name="interface" ng-model="interface">
                     <option>wifi</option>
                     <option>ethernet</option>
+                    <option>3g</option>
                 </select>
             </div>
         </div>
@@ -44,16 +45,46 @@
         <div class="control-group">
             <label for="key" class="control-label">Key</label>
             <div class="controls">
-                <input name="key" type="text" ng-model="key" ng-pattern="pattern" ng-disabled="disable()" ng-required="!disable()">
-                <span class="help-inline error" ng-show="networkForm.key.$error.required">Required field.</span>
-                <span class="help-inline error" ng-show="networkForm.key.$error.pattern">Wrong format. Use either 5/13 ASCII or 10/26 HEX characters as WEP key. A valid ASCII-based key will be translated into a HEX-based one. For WPA(2)-PSK encrypted networks, please enter your 8-to-63-character passphrase.
+                <input name="key" type="text" ng-model="key" ng-pattern="patternKey" ng-disabled="disable()" ng-required="!disable()">
+                <span class="help-inline error" ng-show="networkForm.key.$error.required && !networkForm.key.$pristine">Required field.</span>
+                <span class="help-inline error" ng-show="networkForm.key.$error.pattern && !networkForm.key.$pristine">Wrong format. Use either 5/13 ASCII or 10/26 HEX characters as WEP key. A valid ASCII-based key will be translated into a HEX-based one. For WPA(2)-PSK encrypted networks, please enter your 8-to-63-character passphrase.
             </span>
+            </div>
+        </div>
+    </div>
+    <div class="well well-large" ng-show="interface=='3g'">
+        <div class="control-group">
+            <label for="apn" class="control-label">APN</label>
+            <div class="controls">
+                <input name="apn" type="text" ng-model="network.wan.apn" ng-pattern="patternApn" ng-required="interface=='3g'">
+                <span class="help-inline error" ng-show="networkForm.apn.$error.required && !networkForm.apn.$pristine">Required field.</span>
+                <span class="help-inline error" ng-show="networkForm.apn.$error.pattern && !networkForm.apn.$pristine">Wrong format. Only alphanumeric, underscore, hyphen and dot characters allowed.</span>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="pincode" class="control-label">Pincode</label>
+            <div class="controls">
+                <input name="pincode" type="text" ng-model="network.wan.pincode" ng-pattern="patternPincode" ng-required="interface=='3g'">
+                <span class="help-inline error" ng-show="networkForm.pincode.$error.required && !networkForm.pincode.$pristine">Required field.</span>
+                <span class="help-inline error" ng-show="networkForm.pincode.$error.pattern && !networkForm.pincode.$pristine">Wrong format. A 4-digit code is expected.</span>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="username" class="control-label">Username</label>
+            <div class="controls">
+                <input name="username" type="text" ng-model="network.wan.username" ng-required="false">
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="password" class="control-label">Password</label>
+            <div class="controls">
+                <input name="password" type="text" ng-model="network.wan.password" ng-required="false">
             </div>
         </div>
     </div>
     <div class="control-group">
         <div class="controls">
-            <button type="submit" class="btn btn-primary" ng-disabled="networkForm.$invalid && network.wan.interface=='wifi'">Save</button>
+            <button type="submit" class="btn btn-primary" ng-disabled="networkForm.$invalid && (interface=='wifi' || interface=='3g')">Save</button>
         </div>
     </div>
 </form>

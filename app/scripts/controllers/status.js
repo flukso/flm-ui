@@ -83,7 +83,17 @@ angular.module("flmUiApp")
 
         flmRpc.call("uci", "get_all", ["network"]).then(
             function(network) {
-                $scope.mode = network.wan.ifname == "wlan0" ? "wifi" : "ethernet";
+                switch(network.wan.ifname) {
+                case "wlan0":
+                    $scope.mode = "wifi";
+                    break;
+                case "eth1":
+                    $scope.mode = "ethernet";
+                    break;
+                case "ppp0":
+                    $scope.mode = "3g";
+                    break;
+                }
             },
             pushError
         );
