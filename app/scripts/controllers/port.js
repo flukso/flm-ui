@@ -53,6 +53,9 @@ angular.module("flmUiApp")
             case "enable":
                 disable = false;
                 break;
+            case "math":
+                disable = !($scope.ports.main.phase == "1phase");
+                break;
             case "current":
                 disable = disable || port["class"] != "current clamp";
                 break;
@@ -184,6 +187,19 @@ angular.module("flmUiApp")
                         flx.main.phase = "3p-n";
                         break;
                     }
+                    switch ($scope.ports.main.math) {
+                    case "none":
+                        flx.main.math = "none";
+                        break;
+                    case "port 2 + port 1":
+                        if (flx.main.phase == "1p") {
+                            flx.main.math = "p2+p1";
+                        } else {
+                            $scope.ports.main.math == "none";
+                            flx.main.math = "none";
+                        }
+                        break;
+                    }
                     switch ($scope.ports.main.led_mode) {
                     case "port 4":
                         flx.main.led_mode = "4";
@@ -246,6 +262,55 @@ angular.module("flmUiApp")
                 });
         };
 
+        $scope.match = function() {
+            var tpl =
+                '<div class="modal-header">'+
+                '<h2>Running phase matching algorithm</h2>'+
+                '</div>'+
+                '<div class="modal-body">'+
+                '<div class="progress progress-striped {{progressStatus}} active">' +
+                '<div class="bar" style="width: {{progress}}%;"></div>' +
+                '</div>' +
+                '<textarea id="progressLog" readonly="readonly">{{progressLog}}</textarea>'+
+                /*'<p>{{flx}}</p>' +*/
+                '</div>'+
+                '<div class="modal-footer">'+
+                '<button ng-click="next()" class="btn btn-primary" ng-disabled="nextDisabled">Next</button>'+
+                '<button ng-click="close()" class="btn btn-primary" ng-disabled="closeDisabled">Close</button>'+
+                '</div>';
+
+            var rslv = {
+                flx: function() {
+                    var flx = {};
+
+                    flx.main = {};
+                    switch ($scope.ports.main.math) {
+                    case "none":
+                        flx.main.math = "none";
+                        break;
+                    case "port 2 + port 1":
+                        flx.main.math = "p2+p1";
+                        break;
+                    }
+                    return flx;
+                }
+            };
+
+            var opts = {
+                backdrop: true,
+                keyboard: false,
+                backdropClick: false,
+                template: tpl,
+                resolve: rslv,
+                controller: "PortMatchCtrl"
+
+            };
+
+            $modal.open(opts).result
+                .then(function() {
+                });
+        };
+
         flmRpc.call("uci", "get_all", ["flx"]).then(
             function(flx) {
                 $scope.ports = {};
@@ -262,6 +327,14 @@ angular.module("flmUiApp")
                     break;
                 case "255":
                     $scope.ports.main.led_mode = "heartbeat";
+                    break;
+                }
+                switch (flx.main.math) {
+                case "none":
+                    $scope.ports.main.math = "none";
+                    break;
+                case "p2+p1":
+                    $scope.ports.main.math = "port 2 + port 1";
                     break;
                 }
                 switch (flx.main.phase) {
@@ -347,10 +420,6 @@ angular.module("flmUiApp")
             $scope.progressLog += "\nCommitting changes.";
             flmRpc.call("sys", "exec", ["ubus send flukso.sighup"])
             .then(setTimeout(function() {
-                flmRpc.call("sys", "exec", ["ubus send flx.shift.calc"]);
-                $scope.progressLog += "\nCalculating shift parameters.";
-                $scope.progressLog += "\n\t* Make sure PV production is turned off."
-                $scope.progressLog += "\n\t* Make sure there's a decent load present on each phase."
                 $scope.progressLog += "\nDone."
                 $scope.progress += 6;
                 if ($scope.progress == 100) {
@@ -361,6 +430,47 @@ angular.module("flmUiApp")
                 $scope.closeDisabled = false;
             }, 5000));
         })
+    }]);
+
+angular.module("flmUiApp")
+    .controller("PortMatchCtrl", ["$scope", "$q", "flmRpc", "$modalInstance", "flx",
+    function($scope, $q, flmRpc, $modalInstance, flx) {
+        $scope.flx = flx;
+        $scope.closeDisabled = true;
+        $scope.nextDisabled = false;
+        $scope.progress = 0;
+        $scope.progressStatus = "progress-info";
+        $scope.progressLog = "Ready to run the phase matching algorithm.";
+        $scope.progressLog += "\n\t* Make sure PV production is turned off.";
+        $scope.progressLog += "\n\t* Make sure there's a decent load present on each phase.";
+        $scope.close = function(result) {
+            $modalInstance.close();
+        }
+        $scope.next = function(result) {
+            switch ($scope.progress) {
+            case 0:
+                flmRpc.call("sys", "exec", ["ubus send flx.shift.calc '{\"port\": \"*\"}'"]);
+                if ($scope.flx.main.math == "p2+p1") {
+                    $scope.progress = 50;
+                    $scope.progressLog += "\nSwitch PV production back on before proceeding to the next step."
+                } else {
+                    $scope.progress = 100;
+                    $scope.closeDisabled = false;
+                    $scope.nextDisabled = true;
+                    $scope.progressStatus = "progress-success";
+                    $scope.progressLog += "\nFinished phase matching."
+                }
+                break;
+            case 50:
+                flmRpc.call("sys", "exec", ["ubus send flx.shift.calc '{\"port\": 1}'"]);
+                $scope.progress = 100;
+                $scope.closeDisabled = false;
+                $scope.nextDisabled = true;
+                $scope.progressStatus = "progress-success";
+                $scope.progressLog += "\nFinished phase matching."
+                break;
+            }
+        }
     }]);
 
 angular.module("flmUiApp")

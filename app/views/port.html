@@ -14,6 +14,15 @@
             </div>
         </div>
         <div class="control-group">
+            <label for="math" class="control-label">Math</label>
+            <div class="controls">
+                <select name="math" ng-model="ports.main.math" ng-disabled="disable('math')">
+                    <option>none</option>
+                    <option>port 2 + port 1</option>
+                </select>
+            </div>
+        </div>
+        <div class="control-group">
             <label for="led" class="control-label">LED mode</label>
             <div class="controls">
                 <select name="led" ng-model="ports.main.led_mode" ng-disabled="disable('led')">
@@ -84,8 +93,9 @@
     </div>
     <div class="control-group">
         <div class="controls">
-            <button class="btn btn-primary port" ng-click="commit()" ng-disabled="portForm.$invalid">Save</button>
-            <button class="btn btn-primary port" ng-click="sensors()">Sensors</button>
+            <button class="btn btn-success port" ng-click="commit()" ng-disabled="portForm.$invalid">Save</button>
+            <button class="btn btn-success port" ng-click="match()">Match Phases</button>
+            <button class="btn btn-success port" ng-click="sensors()">Sensors</button>
         </div>
     </div>
 </form>
