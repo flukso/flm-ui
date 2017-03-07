@@ -87,3 +87,11 @@ form[name="servicesForm"] .control-label {
 button.kube, button.port {
     margin: 24px 8px 0px 0px;
 }
+
+h4.port {
+    text-align: center;
+}
+
+#port-2 {
+    background-color: #fcfcfc;
+}

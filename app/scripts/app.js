@@ -52,6 +52,11 @@ angular.module('flmUiApp', [
         controller: 'StatusCtrl',
         tagName: 'status'
       })
+      .when('/gauge', {
+        templateUrl: 'views/gauge.html',
+        controller: 'GaugeCtrl',
+        tagName: 'gauge'
+      })
       .when('/syslog', {
         templateUrl: 'views/syslog.html',
         controller: 'SyslogCtrl',
