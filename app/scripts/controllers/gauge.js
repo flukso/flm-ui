@@ -250,6 +250,7 @@ angular.module("flmUiApp")
                         gauge: new JustGage({
                             id: "gauge-" + port + "-" + gauge,
                             noGradient: true,
+                            refreshAnimationTime: 50,
                             levelColors: subtype2gauge[sensor[idx].subtype].colors,
                             value: 0,
                             min: 0,
