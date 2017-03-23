@@ -27,6 +27,12 @@ angular.module("flmUiApp")
             $scope.alerts.splice(index, 1);
         };
 
+        $scope.start = onConnect;
+        $scope.stop = function() {
+            client.unsubscribe("/sensor/+/gauge");
+            client.unsubscribe("/sensor/+/counter");
+        };
+
         function pushError(error) {
             $scope.alerts.push({
                type: "error",

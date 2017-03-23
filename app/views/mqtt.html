@@ -6,6 +6,9 @@
     <textarea id="mqtt" readonly="readonly">{{mqtt}}</textarea>
 </div>
 
+<button class="btn btn-success mqtt" ng-click="start()">Start</button>
+<button class="btn btn-danger mqtt" ng-click="stop()">Stop</button>
+ 
 <div ng-show="debug">
     <p>{{mqtt}}</p>
 </div>
