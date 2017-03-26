@@ -67,6 +67,11 @@ angular.module('flmUiApp', [
         controller: 'MqttCtrl',
         tagName: 'mqtt'
       })
+      .when('/test', {
+        templateUrl: 'views/test.html',
+        controller: 'TestCtrl',
+        tagName: 'test'
+      })
       .otherwise({
         redirectTo: '/'
       });

@@ -1,0 +1,13 @@
+<div>
+    <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
+</div>
+
+<div>
+    <textarea id="test" readonly="readonly">{{test}}</textarea>
+</div>
+
+<button class="btn btn-success test" ng-click="run()">Run</button>
+ 
+<div ng-show="debug">
+    <p>{{test}}</p>
+</div>
