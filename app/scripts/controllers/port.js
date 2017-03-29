@@ -60,6 +60,7 @@ angular.module("flmUiApp")
                 disable = disable || port["class"] != "current clamp";
                 break;
             case "type":
+            case "trigger":
             case "constant":
                 disable = disable || port["class"] != "pulse";
                 break;
@@ -76,6 +77,7 @@ angular.module("flmUiApp")
                 return clss == "current clamp";
                 break;
             case "type":
+            case "trigger":
             case "constant":
                 return clss == "pulse";
                 break;
@@ -227,6 +229,7 @@ angular.module("flmUiApp")
                             enable: $scope.ports[i].enable,
                             name: $scope.ports[i].name,
                             current: $scope.ports[i].current,
+                            trigger: $scope.ports[i].trigger,
                             constant: $scope.ports[i].constant,
                             dsmr: $scope.ports[i].dsmr
                         }

@@ -54,13 +54,26 @@
                 <input name="class" type="text" ng-model="ports[i].class" disabled>
             </div>
         </div>
+        <div class="control-group" ng-show="show('trigger')">
+            <label for="trigger" class="control-label">Trigger</label>
+            <div class="controls">
+                <select name="type" ng-model="ports[i].trigger" ng-disabled="disable('trigger')">
+                    <option>edge</option>
+                    <option>level</option>
+                </select>
+            </div>
+        </div>
         <div class="control-group" ng-show="show('type')">
             <label for="type" class="control-label">Type</label>
             <div class="controls">
                 <select name="type" ng-model="ports[i].type" ng-disabled="disable('type')">
                     <option>electricity</option>
+                    <option>heat</option>
                     <option>water</option>
                     <option>gas</option>
+                    <option>fuel</option>
+                    <option>pellet</option>
+                    <option>time</option>
                 </select>
             </div>
         </div>
