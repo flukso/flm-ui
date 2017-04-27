@@ -101,42 +101,42 @@ angular.module("flmUiApp")
                 label: "W",
                 max: "power",
                 decimals: 0,
-                colors: defaultColors 
+                colors: defaultColors
             },
             pminus: {
                 title: "P-",
                 label: "W",
                 max: "power",
                 decimals: 0,
-                colors: defaultColors 
+                colors: defaultColors
             },
             q1: {
                 title: "Q1",
                 label: "VAr",
                 max: "power",
                 decimals: 0,
-                colors: defaultColors 
+                colors: defaultColors
             },
             q2: {
                 title: "Q2",
                 label: "VAr",
                 max: "power",
                 decimals: 0,
-                colors: defaultColors 
+                colors: defaultColors
             },
             q3: {
                 title: "Q3",
                 label: "VAr",
                 max: "power",
                 decimals: 0,
-                colors: defaultColors 
+                colors: defaultColors
             },
             q4: {
                 title: "Q4",
                 label: "VAr",
                 max: "power",
                 decimals: 0,
-                colors: defaultColors 
+                colors: defaultColors
             },
             vrms: {
                 title: "Vrms",
@@ -150,21 +150,21 @@ angular.module("flmUiApp")
                 label: "A",
                 max: "current",
                 decimals: 2,
-                colors: defaultColors 
+                colors: defaultColors
             },
             vthd: {
                 title: "Vthd",
                 label: "-",
                 max: 1,
                 decimals: 2,
-                colors: defaultColors 
+                colors: defaultColors
             },
             ithd: {
                 title: "Ithd",
                 label: "-",
                 max: 1,
                 decimals: 2,
-                colors: defaultColors 
+                colors: defaultColors
             },
             pf: {
                 title: "Pf",
@@ -242,7 +242,7 @@ angular.module("flmUiApp")
                 if (iidx && iidx < 37 && (iidx - 1) % 12 != 9 &&
                                          (iidx - 1) % 12 != 11)  {
                     var port = Math.floor((iidx - 1) / 12) + 1;
-                    var gauge = ((iidx - 1) % 12 + 1); 
+                    var gauge = ((iidx - 1) % 12 + 1);
                     $scope.sensor[sensor[idx].id] = {
                         idx: iidx,
                         subtype: sensor[idx].subtype,
