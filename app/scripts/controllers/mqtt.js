@@ -47,7 +47,7 @@ angular.module("flmUiApp")
         var broker = location.hostname;
         var port = 8083;
         var path = "/mqtt";
- 
+
         function mqttConnect() {
             var wsID = "flm-ui-mqtt-" + Date.now();
             client = new Paho.MQTT.Client(broker, port, path, wsID);
