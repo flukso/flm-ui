@@ -458,6 +458,7 @@ angular.module("flmUiApp")
                     $scope.progressStatus = "progress-danger";
                 };
                 $scope.closeDisabled = false;
+                $scope.$apply();
             }, 5000));
         })
     }]);
