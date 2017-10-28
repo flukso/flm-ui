@@ -44,15 +44,15 @@ angular.module("flmUiApp")
         owrt-encryption     enabled     wep     wpa     pair_ciphers
         none                false       false   0       []
         wep                 true        true    0       []
-        psk                 true        false   1       ["TKIP"]
+        psk+tkip            true        false   1       ["TKIP"]
         psk+ccmp            true        false   1       ["CCMP"]
         psk+tkip+ccmp       true        false   1       ["TKIP","CCMP"]
         psk2+tkip           true        false   2       ["TKIP"]
-        psk2                true        false   2       ["CCMP"]
+        psk2+ccmp           true        false   2       ["CCMP"]
         psk2+tkip+ccmp      true        false   2       ["TKIP","CCMP"]
         psk-mixed+tkip      true        false   3       ["TKIP"]
         psk-mixed+ccmp      true        false   3       ["CCMP"]
-        psk-mixed           true        false   3       ["TKIP","CCMP"]
+        psk-mixed+tkip+ccmp true        false   3       ["TKIP","CCMP"]
         */
 
         function scan2encrypt(ap) {
@@ -79,18 +79,6 @@ angular.module("flmUiApp")
                 break;
             }
 
-            switch (encr) {
-            case "psk+tkip":
-                encr = "psk";
-                break;
-            case "psk2+ccmp":
-                encr = "psk2";
-                break;
-            case "psk-mixed+tkip+ccmp":
-                encr = "psk-mixed";
-                break;            
-            }
-
             return encr;
         }
 
@@ -99,15 +87,15 @@ angular.module("flmUiApp")
             {
                 "none": "None",
                 "wep" : "WEP Open/Shared (NONE)",
-                "psk" : "WPA PSK (TKIP)",
+                "psk+tkip" : "WPA PSK (TKIP)",
                 "psk+ccmp" : "WPA PSK (CCMP)",
                 "psk+tkip+ccmp" : "WPA PSK (TKIP, CCMP)",
-                "psk2" : "WPA2 PSK (CCMP)",
                 "psk2+tkip" : "WPA2 PSK (TKIP)",
+                "psk2+ccmp" : "WPA2 PSK (CCMP)",
                 "psk2+tkip+ccmp": "WPA2 PSK (TKIP, CCMP)",
-                "psk-mixed": "mixed WPA/WPA2 PSK (TKIP, CCMP)",
                 "psk-mixed+tkip": "mixed WPA/WPA2 PSK (TKIP)",
                 "psk-mixed+ccmp": "mixed WPA/WPA2 PSK (CCMP)",
+                "psk-mixed+tkip+ccmp": "mixed WPA/WPA2 PSK (TKIP, CCMP)",
             };
 
             return descr[encr];
@@ -130,7 +118,7 @@ angular.module("flmUiApp")
             };
 
             return {
-                test: function(value) { 
+                test: function(value) {
                     if (!$scope.aps[$scope.ssid]) {
                         return true;
                     }
@@ -151,7 +139,7 @@ angular.module("flmUiApp")
             var regex = /^[\w\.\-]{1,32}$/;
 
             return {
-                test: function(value) { 
+                test: function(value) {
                     return regex.test(value);
                 }
             };
@@ -161,7 +149,7 @@ angular.module("flmUiApp")
             var regex = /^[\d]{4,4}$/;
 
             return {
-                test: function(value) { 
+                test: function(value) {
                     return regex.test(value);
                 }
             };
