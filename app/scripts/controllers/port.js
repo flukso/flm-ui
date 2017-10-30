@@ -48,8 +48,6 @@ angular.module("flmUiApp")
             var disable = port.enable == "0";
 
             switch (param) {
-            case "phase":
-            case "led":
             case "enable":
                 disable = false;
                 break;

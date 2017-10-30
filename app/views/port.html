@@ -6,7 +6,7 @@
         <div class="control-group">
             <label for="phase" class="control-label">Electrical System</label>
             <div class="controls">
-                <select name="phase" ng-model="ports.main.phase" ng-disabled="disable('phase')">
+                <select name="phase" ng-model="ports.main.phase">
                     <option>1phase</option>
                     <option>3phase with N</option>
                     <option>3phase without N</option>
@@ -34,7 +34,7 @@
         <div class="control-group">
             <label for="led" class="control-label">LED mode</label>
             <div class="controls">
-                <select name="led" ng-model="ports.main.led_mode" ng-disabled="disable('led')">
+                <select name="led" ng-model="ports.main.led_mode">
                     <option>heartbeat</option>
                     <option>port 4</option>
                     <option>port 5</option>
