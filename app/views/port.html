@@ -6,7 +6,7 @@
         <div class="control-group">
             <label for="phase" class="control-label">Electrical System</label>
             <div class="controls">
-                <select name="phase" ng-model="ports.main.phase">
+                <select name="phase" ng-model="ports.main.phase" ng-change="change()">
                     <option>1phase</option>
                     <option>3phase with N</option>
                     <option>3phase without N</option>
@@ -16,7 +16,7 @@
         <div class="control-group" ng-show="ports.main.phase == '1phase'">
             <label for="math1" class="control-label">Math</label>
             <div class="controls">
-                <select name="math1" ng-model="ports.main.math1">
+                <select name="math1" ng-model="ports.main.math1" ng-change="change()">
                     <option>none</option>
                     <option>port 2 + port 1</option>
                 </select>
