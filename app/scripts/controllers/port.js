@@ -259,6 +259,13 @@ angular.module("flmUiApp")
                             subtype: $scope.ports[i].type == "electricity" ? "pplus" : ""
                         }
                     }
+                    for (var i = 2; i < 4; i++) {
+                        for (var j = 1; j < 3; j++) { /* pplus & pminus sensors */
+                            var s = (i - 1) * 12 + j;
+                            flukso[s.toString()].tmpo = ($scope.ports.main.phase != "1phase" &&
+                                    $scope.ports.main.math3 == "port 1 + port 2 + port 3") ? "0" : "1";
+                        }
+                    }
                     return flukso;
                 }
             };
