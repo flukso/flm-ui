@@ -13,12 +13,20 @@
                 </select>
             </div>
         </div>
-        <div class="control-group">
-            <label for="math" class="control-label">Math</label>
+        <div class="control-group" ng-show="ports.main.phase == '1phase'">
+            <label for="math1" class="control-label">Math</label>
             <div class="controls">
-                <select name="math" ng-model="ports.main.math" ng-disabled="disable('math')">
+                <select name="math1" ng-model="ports.main.math1">
                     <option>none</option>
                     <option>port 2 + port 1</option>
+                </select>
+            </div>
+        </div>
+        <div class="control-group" ng-show="ports.main.phase != '1phase'">
+            <label for="math3" class="control-label">Math</label>
+            <div class="controls">
+                <select name="math3" ng-model="ports.main.math3">
+                    <option>none</option>
                     <option>port 1 + port 2 + port 3</option>
                 </select>
             </div>

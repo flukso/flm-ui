@@ -53,9 +53,6 @@ angular.module("flmUiApp")
             case "enable":
                 disable = false;
                 break;
-            case "math":
-                disable = false;
-                break;
             case "current":
                 disable = disable || port["class"] != "current clamp";
                 break;
@@ -177,38 +174,31 @@ angular.module("flmUiApp")
                 flx: function() {
                     var flx = {};
 
+                    function math2uci(math) {
+                        switch (math) {
+                        case "none":
+                            return "none";
+                        case "port 2 + port 1":
+                            return "p2+p1";
+                        case "port 1 + port 2 + port 3":
+                            return "p1+p2+p3";
+                        }
+                    }
+
                     flx.main = {};
                     switch ($scope.ports.main.phase) {
                     case "1phase":
                         flx.main.phase = "1p";
+                        flx.main.math = math2uci($scope.ports.main.math1);
                         break;
                     case "3phase with N":
                         flx.main.phase = "3p+n";
+                        flx.main.math = math2uci($scope.ports.main.math3);
                         break;
                     case "3phase without N":
                         flx.main.phase = "3p-n";
-                        break;
-                    }
-                    switch ($scope.ports.main.math) {
-                    case "none":
-                        flx.main.math = "none";
-                        break;
-                    case "port 2 + port 1":
-                        if (flx.main.phase == "1p") {
-                            flx.main.math = "p2+p1";
-                        } else {
-                            $scope.ports.main.math == "none";
-                            flx.main.math = "none";
-                        }
-                        break;
-                    case "port 1 + port 2 + port 3":
-                        if (flx.main.phase == "1p") {
-                            $scope.ports.main.math == "none";
-                            flx.main.math = "none";
-                        } else {
-                            flx.main.math = "p1+p2+p3";
-                        }
-                        break;
+                        flx.main.math = math2uci($scope.ports.main.math3);
+                       break;
                     }
                     switch ($scope.ports.main.led_mode) {
                     case "port 4":
@@ -274,13 +264,16 @@ angular.module("flmUiApp")
                         function(flx) {
                             switch (flx.main.math) {
                             case "none":
-                                $scope.ports.main.math = "none";
+                                $scope.ports.main.math1 = "none";
+                                $scope.ports.main.math3 = "none";
                                 break;
                             case "p2+p1":
-                                $scope.ports.main.math = "port 2 + port 1";
+                                $scope.ports.main.math1 = "port 2 + port 1";
+                                $scope.ports.main.math3 = "none";
                                 break;
                             case "p1+p2+p3":
-                                $scope.ports.main.math = "port 1 + port 2 + port 3";
+                                $scope.ports.main.math1 = "none";
+                                $scope.ports.main.math3 = "port 1 + port 2 + port 3";
                                 break;
                             }
                         },
@@ -311,13 +304,11 @@ angular.module("flmUiApp")
                     var flx = {};
 
                     flx.main = {};
-                    switch ($scope.ports.main.math) {
-                    case "none":
-                        flx.main.math = "none";
-                        break;
-                    case "port 2 + port 1":
+                    if ($scope.ports.main.phase == "1phase" && $scope.ports.main.math1 == "port 2 + port 1") {
                         flx.main.math = "p2+p1";
-                        break;
+                    } else {
+                        /* matching procedure only differs in p2+p1 case */
+                        flx.main.math = "none";
                     }
                     return flx;
                 }
@@ -358,13 +349,16 @@ angular.module("flmUiApp")
                 }
                 switch (flx.main.math) {
                 case "none":
-                    $scope.ports.main.math = "none";
+                    $scope.ports.main.math1 = "none";
+                    $scope.ports.main.math3 = "none";
                     break;
                 case "p2+p1":
-                    $scope.ports.main.math = "port 2 + port 1";
+                    $scope.ports.main.math1 = "port 2 + port 1";
+                    $scope.ports.main.math3 = "none";
                     break;
                 case "p1+p2+p3":
-                    $scope.ports.main.math = "port 1 + port 2 + port 3";
+                    $scope.ports.main.math1 = "none";
+                    $scope.ports.main.math3 = "port 1 + port 2 + port 3";
                     break;
                 }
                 switch (flx.main.phase) {
