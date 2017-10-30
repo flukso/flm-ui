@@ -82,6 +82,23 @@ angular.module("flmUiApp")
             }
         }
 
+        $scope.change = function() {
+            switch ($scope.ports.main.phase) {
+            case "1phase":
+                if ($scope.ports.main.math1 == "port 2 + port 1") {
+                    $scope.ports[1].enable = "1";
+                    $scope.ports[2].enable = "1";
+                }
+                break;
+            case "3phase with N":
+            case "3phase without N":
+                $scope.ports[1].enable = "1";
+                $scope.ports[2].enable = "1";
+                $scope.ports[3].enable = "1";
+                break;
+            }
+        }
+
         function regexCreate(param) {
             var regex = {
                 "name": /^\w[\w\ \-]{0,15}$/,
