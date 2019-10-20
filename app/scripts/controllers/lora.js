@@ -125,9 +125,10 @@ angular.module("flmUiApp")
         $q.all(promiseUci)
         .finally(function () {
             $scope.progress = 50;
-            flmRpc.call("uci", "commit", ["lora"]);
             $scope.progressLog += "\nCommitting changes.";
-            flmRpc.call("sys", "exec", ["ubus send flukso.sighup"])
+            flmRpc.call("uci", "commit", ["lora"]);
+            $scope.progressLog += "\nRestarting flukso daemon..";
+            flmRpc.call("sys", "exec", ["/etc/init.d/flukso restart"])
             .then(setTimeout(function() {
                 $scope.progressLog += "\nDone."
                 $scope.progress += 50;
