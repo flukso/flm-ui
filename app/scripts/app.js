@@ -47,6 +47,11 @@ angular.module('flmUiApp', [
         controller: 'NetworkCtrl',
         tagName: 'network'
       })
+      .when('/lora', {
+        templateUrl: 'views/lora.html',
+        controller: 'LoraCtrl',
+        tagName: 'lora'
+      })
       .when('/status', {
         templateUrl: 'views/status.html',
         controller: 'StatusCtrl',

@@ -1,0 +1,40 @@
+<div>
+    <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
+</div>
+
+<form name="loraForm" class="form-horizontal" ng-submit="save()">
+   <div class="well well-large">
+       <div class="control-group">
+          <label for="enable" class="control-label">Enable</label>
+          <div class="controls">
+              <input name="enable" type="checkbox" ng-true-value="'1'" ng-false-value="'0'" ng-model="enable">
+          </div>
+       </div>
+       <div class="control-group">
+            <label for="appeui" class="control-label">Appeui</label>
+            <div class="controls">
+                <input name="appeui" type="text" ng-model="otaa.appeui">
+            </div>
+        </div>
+       <div class="control-group">
+            <label for="appkey" class="control-label">Appkey</label>
+            <div class="controls">
+                <input name="appkey" type="text" ng-model="otaa.appkey">
+            </div>
+       </div>
+       <div class="control-group">
+            <label for="deveui" class="control-label">Deveui</label>
+            <div class="controls">
+                <input name="deveui" type="text" ng-model="otaa.deveui">
+            </div>
+       </div>
+    </div>
+    <div class="control-group">
+        <div class="controls">
+            <button type="submit" class="btn btn-success" ng-disabled="loraForm.$invalid">Save</button>
+        </div>
+    </div>
+</form>
+
+<div ng-show="debug">
+</div>
